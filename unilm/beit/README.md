@@ -1,7 +1,7 @@
 ## Datasets and simulated data splits
 - CIFAR10: [download link](https://drive.google.com/drive/folders/1ZErR7RMSVImkzYzz0hLl25f9agJwp0Zx)
 - Retina: [download link](https://drive.google.com/file/d/1eVcT_IRF8n3sLNyZS-JT4iU-1C19QIOh/view?usp=sharing)
-- COVIDx: [download link]https://drive.google.com/file/d/1mMJc4yXGKt6L3vkdcUFXZyUOvmFvG2Px/view?usp=sharing)
+- COVIDx: [download link](https://drive.google.com/file/d/1mMJc4yXGKt6L3vkdcUFXZyUOvmFvG2Px/view?usp=sharing)
 
 ## BEiT
 ### IMNET Pretrained models
