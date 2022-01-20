@@ -247,8 +247,8 @@ def build_transform(is_train, args):
             transform = transforms.Compose([
                 transforms.Resize([args.input_size, args.input_size]),
                 transforms.ToTensor(), 
-                # transforms.Normalize(
-                #     mean=torch.tensor(mean),
-                #     std=torch.tensor(std))
+                transforms.Normalize(
+                    mean=torch.tensor(mean),
+                    std=torch.tensor(std))
                 ])
     return transform
