@@ -1,7 +1,7 @@
 # SSL-FL
 
 ## Set up environment
-- ```conda env create -f environment_beit/yml```
+- ```conda env create -f environment_beit.yml```
 - then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
 
 ## Datasets and simulated data splits
