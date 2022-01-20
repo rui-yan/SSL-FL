@@ -1,4 +1,9 @@
 # SSL-FL
+
+## Set up environment
+- ```conda env create -f environment_beit/yml```
+- then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
+
 ## Datasets and simulated data splits
 - CIFAR10: [download link](https://drive.google.com/drive/folders/1ZErR7RMSVImkzYzz0hLl25f9agJwp0Zx)
 - Retina: [download link](https://drive.google.com/file/d/1eVcT_IRF8n3sLNyZS-JT4iU-1C19QIOh/view?usp=sharing)
