@@ -14,4 +14,4 @@ Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
 - BEiT-base: [beit_base_patch16_224_pt22k](https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth)
 - BEiT-large: [beit_large_patch16_224_pt22k](https://unilm.blob.core.windows.net/beit/beit_large_patch16_224_pt22k.pth)
 
-Dall-E Tokenizers: [Download link](https://drive.google.com/file/d/1DkXJTQC7ELCoBUwq8j4XNoxe7dkPUEdr/view?usp=sharing)
+Dall-e Tokenizers: [download link](https://drive.google.com/file/d/1DkXJTQC7ELCoBUwq8j4XNoxe7dkPUEdr/view?usp=sharing)
