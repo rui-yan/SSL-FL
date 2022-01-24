@@ -264,36 +264,25 @@ def main(args, ds_init, model):
     
     # prepare dataset
     create_dataset_and_evalmetrix(args, mode='finetune')
+    
     if args.disable_eval_during_finetuning:
-        dataset_test = None
-        # dataset_val = None
+        dataset_val = None
     else:
-        dataset_test = DatasetFLBEiT(args=args, phase='test')
-        # dataset_val = DatasetFLBEiT(args=args, phase='val')
+        dataset_val = DatasetFLBEiT(args=args, phase='test')
     
-    # sampler_val = torch.utils.data.SequentialSampler(dataset_val)
-    sampler_test = torch.utils.data.SequentialSampler(dataset_test)
+    sampler_val = torch.utils.data.SequentialSampler(dataset_val)
     
-    if dataset_test is not None:
-        # data_loader_val = torch.utils.data.DataLoader(
-        #     dataset_val, sampler=sampler_val,
-        #     batch_size=args.batch_size,
-        #     # batch_size=int(1.5 * args.batch_size),
-        #     num_workers=args.num_workers,
-        #     # pin_memory=args.pin_mem,
-        #     # drop_last=False
-        # )
-        data_loader_test = torch.utils.data.DataLoader(
-            dataset_test, sampler=sampler_test,
-            batch_size=args.batch_size,
-            # batch_size=int(1.5 * args.batch_size),
+    if dataset_val is not None:
+        data_loader_val = torch.utils.data.DataLoader(
+            dataset_val, sampler=sampler_val,
+            # batch_size=args.batch_size,
+            batch_size=int(1.5 * args.batch_size),
             num_workers=args.num_workers,
-            # pin_memory=args.pin_mem,
-            # drop_last=False
+            pin_memory=args.pin_mem,
+            drop_last=False
         )
     else:
-        # data_loader_val = None
-        data_loader_test = None
+        data_loader_val = None
     
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all = Partial_Client_Selection(args, model, mode='finetune')
@@ -312,7 +301,10 @@ def main(args, ds_init, model):
     tot_clients = args.dis_cvs_files
     print('total_clients: ', tot_clients)
     epoch = -1
-            
+    
+    start_time = time.time()
+    max_accuracy = 0.0
+        
     while True:
         print('epoch: ', epoch)
         epoch += 1
@@ -373,7 +365,7 @@ def main(args, ds_init, model):
                 pin_memory=args.pin_mem,
                 drop_last=True,
             )
-            val_loader_proxy_clients[proxy_single_client] = data_loader_test
+            val_loader_proxy_clients[proxy_single_client] = data_loader_val
             
             n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
             # print("Model = %s" % str(model_without_ddp))
@@ -413,17 +405,13 @@ def main(args, ds_init, model):
                     optimizer=optimizer, loss_scaler=loss_scaler, model_ema=model_ema)
                 
                 test_stats = valid(args, model, val_loader_proxy_clients[proxy_single_client], 
-                              data_loader_test=None, TestFlag=False)
-                print(f"Accuracy of the network on the {len(dataset_test)} test images: {test_stats['acc1']:.1f}%")
+                                   data_loader_test=None, TestFlag=False)
+                print(f"Accuracy of the network on the {len(dataset_val)} val images: {test_stats['acc1']:.1f}%")
                 model.cpu()
-                # print('current_acc: {}'.format(args.current_acc))
-                # print('current_test_acc: {}'.format(args.current_test_acc))
                 
                 exit(0)
             
             print(f"Start training for {args.E_epoch} inner epochs")
-            start_time = time.time()
-            max_accuracy = 0.0
             for inner_epoch in range(args.E_epoch):
                 if args.distributed:
                     data_loader_train.sampler.set_epoch(inner_epoch)
@@ -450,11 +438,6 @@ def main(args, ds_init, model):
                                              )
                 
                 # ============ writing logs ============
-                # if args.output_dir and args.save_ckpt:
-                #     if (inner_epoch + 1) % args.save_ckpt_freq == 0 or inner_epoch + 1 == args.E_epoch:
-                #         utils.save_model(
-                #             args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
-                #             loss_scaler=loss_scaler, epoch=inner_epoch, model_ema=model_ema)
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                              'client': cur_single_client,
                              'epoch': epoch,
@@ -467,70 +450,63 @@ def main(args, ds_init, model):
                     with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                         f.write(json.dumps(log_stats) + "\n")
                              
-            total_time = time.time() - start_time
-            total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-            print('Training time {}'.format(total_time_str))
+            # total_time = time.time() - start_time
+            # total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+            # print('Training time {}'.format(total_time_str))
             
             # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory
             model.to('cpu')
         # =========== model average and eval ============ 
         # average model
         average_model(args, model_avg, model_all)
-        # model evaluation
-#         if args.eval:
-#             if epoch % 5 == 0:
-#                 model = model_all[proxy_single_client]
-#                 model.to(device)
-#                 valid(args, model, val_loader_proxy_clients[proxy_single_client], data_loader_test, TestFlag=True)
-#                 model.cpu()
-                
-#             args.record_val_acc = args.record_val_acc.append(args.current_acc, ignore_index=True)
-#             args.record_val_acc.to_csv(os.path.join(args.output_dir, 'val_acc.csv'))
-#             args.record_test_acc = args.record_test_acc.append(args.current_test_acc, ignore_index=True)
-#             args.record_test_acc.to_csv(os.path.join(args.output_dir, 'test_acc.csv'))
-
-#             np.save(args.output_dir + '/learning_rate.npy', args.learning_rate_record)
-            
-#             tmp_round_acc = [val for val in args.current_test_acc.values() if not val == []]
-#             # writer.add_scalar("test/average_accuracy", scalar_value=np.asarray(tmp_round_acc).mean(), global_step=epoch)
-#             log_writer.update(loss=loss_value, head=proxy_single_client + "/loss")
-#         if data_loader_val is not None:
-#             test_stats = evaluate(data_loader_val, model, device)
-#             print(f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.1f}%")
-#             if max_accuracy < test_stats["acc1"]:
-#                 max_accuracy = test_stats["acc1"]
-#                 if args.output_dir and args.save_ckpt:
-#                     utils.save_model(
-#                         args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
-#                         loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
-
-#             print(f'Max accuracy: {max_accuracy:.2f}%')
-#             if log_writer is not None:
-#                 log_writer.update(test_acc1=test_stats['acc1'], head="perf", step=inner_epoch)
-#                 log_writer.update(test_acc5=test_stats['acc5'], head="perf", step=inner_epoch)
-#                 log_writer.update(test_loss=test_stats['loss'], head="perf", step=inner_epoch)
-
-#             log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-#                          **{f'test_{k}': v for k, v in test_stats.items()},
-#                          'client': cur_single_client,
-#                          'epoch': epoch,
-#                          'inner_epoch': inner_epoch,
-#                          'n_parameters': n_parameters}
-#         else:
-#             
         
         # save the global model
         # TO CHECK: global model is the same for each client?
-        if args.output_dir:
-            if (epoch + 1) % args.save_ckpt_freq == 0:
+        if args.output_dir and args.save_ckpt:
+            if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.max_communication_rounds:
                 utils.save_model(
                     args=args, model=model_avg, model_without_ddp=model_avg,
                     optimizer=optimizer, loss_scaler=loss_scaler, epoch=epoch)
         
+        if data_loader_val is not None:
+            model_avg.to(args.device)
+            test_stats = valid(args, model_avg, val_loader_proxy_clients[proxy_single_client], 
+                               data_loader_test=None, TestFlag=False)
+            print(f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.1f}%")
+            
+            if max_accuracy < test_stats["acc1"]:
+                max_accuracy = test_stats["acc1"]
+                if args.output_dir and args.save_ckpt:
+                    utils.save_model(
+                        args=args, model=model_avg, 
+                        model_without_ddp=model_without_ddp, optimizer=optimizer,
+                        loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
+                
+            print(f'Max accuracy: {max_accuracy:.2f}%')
+            if log_writer is not None:
+                log_writer.update(test_acc1=test_stats['acc1'], head="perf", step=epoch)
+                log_writer.update(test_acc5=test_stats['acc5'], head="perf", step=epoch)
+                log_writer.update(test_loss=test_stats['loss'], head="perf", step=epoch)
+            
+            log_stats = {**{f'test_{k}': v for k, v in test_stats.items()},
+                         'epoch': epoch,
+                         'n_parameters': n_parameters}
+            
+        if args.output_dir and utils.is_main_process():
+                if log_writer is not None:
+                    log_writer.flush()
+                with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
+                    f.write(json.dumps(log_stats) + "\n")
+        
+        model_avg.to('cpu')
+        
         print('global_step_per_client: ', args.global_step_per_client[proxy_single_client])
         print('t_total: ', args.t_total[proxy_single_client])
-        
+            
         if args.global_step_per_client[proxy_single_client] >= args.t_total[proxy_single_client]:
+            total_time = time.time() - start_time
+            total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+            print('Training time {}'.format(total_time_str))
             break
 
 if __name__ == '__main__':

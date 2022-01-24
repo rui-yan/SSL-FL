@@ -19,7 +19,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
         self.transform = None
         if args.data_set == 'CIFAR10':
             
-            data_all = np.load(os.path.join('/data/yan/SSL_FL/', args.data_set + '.npy'), allow_pickle = True)
+            data_all = np.load(os.path.join('./data/', args.data_set + '.npy'), allow_pickle = True)
             data_all = data_all.item()
             
             self.data_all = data_all[args.split_type]            
@@ -61,7 +61,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
             
             if self.args.data_set == 'Retina':
                 img = np.load(path)
-                img = resize(img, (256, 256))
+                img = resize(img, (320, 320))
             else:
                 img = np.array(Image.open(path))
                 img = process_covidx_image(img, size=224)
@@ -144,11 +144,14 @@ class DatasetFLBEiT(data.Dataset):
         else:
             index = index % len(self.img_paths)
 
-            path = os.path.join(self.args.data_path, 'train', self.img_paths[index])
+            path = os.path.join(self.args.data_path, self.phase, self.img_paths[index])
             name = self.img_paths[index]
             
-            target = self.labels[name]
-            target = np.asarray(target).astype('int64')
+            try:
+                target = self.labels[name]
+                target = np.asarray(target).astype('int64')
+            except:
+                print(name, index)
             
             if self.args.data_set == 'Retina':
                 img = np.load(path)

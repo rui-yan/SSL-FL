@@ -51,7 +51,7 @@ def inner_valid(args, model, data_loader):
     # switch to evaluation mode
     model.eval()
     
-    print("++++++ Running Validation of client", args.single_client, "++++++")
+    print("++++++ Running Validation ++++++")
     for batch in metric_logger.log_every(data_loader, 10, header):
         images = batch[0]
         target = batch[-1]
@@ -395,6 +395,7 @@ def average_model(args, model_avg, model_all):
             single_client_weight = args.clients_weightes[single_client]
             single_client_weight = torch.from_numpy(np.array(single_client_weight)).float()
             
+            # print(client, ' weight: ', single_client_weight)
             if client == 0:
                 tmp_param_data = dict(model_all[single_client].named_parameters())[
                                      name].data * single_client_weight
@@ -403,6 +404,8 @@ def average_model(args, model_avg, model_all):
                                  dict(model_all[single_client].named_parameters())[
                                      name].data * single_client_weight
         params[name].data.copy_(tmp_param_data)
+    
+    # print('check: ', params==dict(model_avg.named_parameters()))
     
     print('Update each client model parameters----')
     

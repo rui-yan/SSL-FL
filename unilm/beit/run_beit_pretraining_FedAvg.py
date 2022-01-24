@@ -99,8 +99,8 @@ def get_args():
                         help='Interpolation for discrete vae (random, bilinear, bicubic default: "lanczos")')
 
     # Dataset parameters
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'CIFAR100', 
-                                                                'IMNET', 'Retina', 'COVIDx', 'image_folder'],
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDx', 'CIFAR100', 
+                                                                'IMNET', 'Retina', 'image_folder'],
                         type=str, help='ImageNet dataset path')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
@@ -136,7 +136,7 @@ def get_args():
     
     # FL related parameters
     parser.add_argument("--E_epoch", default=1, type=int, help="Local training epoch in FL")
-    parser.add_argument("--max_communication_rounds", default=100, type=int, choices=[30, 100, 400],
+    parser.add_argument("--max_communication_rounds", default=100, type=int,
                         help="Total communication rounds")
     parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")

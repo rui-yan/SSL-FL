@@ -42,7 +42,6 @@ class DataAugmentationForBEiT(object):
             std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
         elif args.data_set == 'Retina':
             mean, std = (0.485,0.456,0.406), (0.229,0.224,0.225)
-            # mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         else:
             mean, std = (0.5, 0.5, 0.5), (0.25, 0.25, 0.25)
         
@@ -246,7 +245,7 @@ def build_transform(is_train, args):
         else:
             transform = transforms.Compose([
                 transforms.Resize([args.input_size, args.input_size]),
-                transforms.ToTensor(), 
+                transforms.ToTensor(),
                 transforms.Normalize(
                     mean=torch.tensor(mean),
                     std=torch.tensor(std))
