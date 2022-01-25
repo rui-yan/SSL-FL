@@ -55,12 +55,25 @@ class DataAugmentationForBEiT(object):
                     second_interpolation=args.second_interpolation,
                 ),
             ])
-        elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
+        elif args.data_set == 'Retina':
             '''https://github.com/xmengli/self_supervised/blob/master/main.py'''
             self.common_transform = transforms.Compose([
                 # transforms.RandomResizedCrop(224, scale=(0.2, 1.)),
                 transforms.RandomGrayscale(p=0.2),
                 transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
+                transforms.RandomHorizontalFlip(),
+                RandomResizedCropAndInterpolationWithTwoPic(
+                    size=args.input_size, second_size=args.second_input_size,
+                    scale=(0.2, 1.0),
+                    interpolation=args.train_interpolation,
+                    second_interpolation=args.second_interpolation,
+                ),
+            ])
+        elif args.data_set == 'COVIDx':
+            self.common_transform = transforms.Compose([
+                # transforms.RandomResizedCrop(224, scale=(0.2, 1.)),
+                # transforms.RandomGrayscale(p=0.2),
+                transforms.ColorJitter(0.5, 0.5, 0.5, 0.5),
                 transforms.RandomHorizontalFlip(),
                 RandomResizedCropAndInterpolationWithTwoPic(
                     size=args.input_size, second_size=args.second_input_size,
@@ -234,7 +247,7 @@ def build_transform(is_train, args):
                     ])
             else:
                 transform = transforms.Compose([
-                    # transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
+                    transforms.RandomRotation(degrees=15),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(
