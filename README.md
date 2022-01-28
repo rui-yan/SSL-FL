@@ -7,13 +7,19 @@
 ## Datasets and simulated data splits
 ### Download gdrive for file uploading
 Step1: ```wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz```
+
 Step2: ```tar -xvf gdrive_2.1.1_linux_386.tar.gz```
+
 Step3: ```./gdrive about```
+
 Step4: ```./gdrive upload /home/documents/file_name.zip```
+
 Step5: ```./gdrive list```
 ### Download data from google drive
 ```pip install gdown```
+
 ```gdown https://drive.google.com/uc?id=```
+
 - CIFAR10: [download link](https://drive.google.com/file/d/1elgSFsfDI3Tfdf3BZ44lxBs2BaJ4lf5_/view?usp=sharing)
 - Retina: [download link](https://drive.google.com/file/d/10l2A5dW5pdU6dXAjmP-o_dVgEduhsoT2/view?usp=sharing)
 - COVIDx: [download link](https://drive.google.com/file/d/1zOHaHVqgTMk_25fciTojq7ZIurpWIFSb/view?usp=sharing)
