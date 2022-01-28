@@ -42,13 +42,12 @@ CUDA_VISIBLE_DEVICES=0 python run_class_finetuning_FedAvg.py \
      --nb_classes ${N_CLASSES} \
      --output_dir ${OUTPUT_PATH_FT} \
      --lr ${LR} \
-     --save_ckpt_freq 10 \
-     --disable_eval_during_finetuning \
+     --save_ckpt_freq 20 \
      --model beit_base_patch16_224 \
      --batch_size 64 --update_freq 1 --split_type ${SPLIT_TYPE} \
      --warmup_epochs 5 --layer_decay 0.65 --drop_path 0.2 \
      --weight_decay 0.05 --layer_scale_init_value 0.1 --clip_grad 3.0 \
-     --E_epoch 1 --max_communication_rounds 100 --num_local_clients -1 
+     --E_epoch 1 --max_communication_rounds ${EPOCHS} --num_local_clients -1 
         
         
 # ------------------ evaluate ----------------- #
