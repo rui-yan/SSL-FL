@@ -30,6 +30,12 @@ Image.LOAD_TRUNCATED_IMAGES = True
 CIFAR10_DEFAULT_MEAN = (0.49139968, 0.48215841, 0.44653091)
 CIFAR10_DEFAULT_STD = (0.24703223, 0.24348513, 0.26158784)
 
+RETINA_MEAN = (0.5007, 0.5010, 0.5019)
+RETINA_STD = (0.0342, 0.0535, 0.0484)
+
+COVIDX_MEAN = (0.5518, 0.5518, 0.5518)
+COVIDX_STD = (0.2051, 0.2051, 0.2051)
+
 class DataAugmentationForBEiT(object):
     def __init__(self, args):
         
@@ -41,11 +47,13 @@ class DataAugmentationForBEiT(object):
             mean = IMAGENET_INCEPTION_MEAN if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_MEAN
             std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
         elif args.data_set == 'Retina':
-            mean, std = (0.485,0.456,0.406), (0.229,0.224,0.225)
+            mean, std = RETINA_MEAN, RETINA_STD
+        elif args.data_set == 'COVIDx':
+            mean, std = COVIDX_MEAN, COVIDX_STD
         else:
-            mean, std = (0.5, 0.5, 0.5), (0.25, 0.25, 0.25)
+            mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
-        if args.data_set == 'CIFAR10' or args.data_set == 'IMNET':
+        if args.data_set == 'CIFAR10':
             self.common_transform = transforms.Compose([
                 transforms.ColorJitter(0.4, 0.4, 0.4),
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -58,10 +66,10 @@ class DataAugmentationForBEiT(object):
         elif args.data_set == 'Retina':
             '''https://github.com/xmengli/self_supervised/blob/master/main.py'''
             self.common_transform = transforms.Compose([
-                # transforms.RandomResizedCrop(224, scale=(0.2, 1.)),
                 transforms.RandomGrayscale(p=0.2),
-                transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
-                transforms.RandomHorizontalFlip(),
+                transforms.ColorJitter(0.4, 0.4, 0.4),
+                transforms.RandomHorizontalFlip(p=0.5),
+                # transforms.RandomRotation(degrees=10),
                 RandomResizedCropAndInterpolationWithTwoPic(
                     size=args.input_size, second_size=args.second_input_size,
                     scale=(0.2, 1.0),
@@ -71,10 +79,10 @@ class DataAugmentationForBEiT(object):
             ])
         elif args.data_set == 'COVIDx':
             self.common_transform = transforms.Compose([
-                # transforms.RandomResizedCrop(224, scale=(0.2, 1.)),
-                # transforms.RandomGrayscale(p=0.2),
-                transforms.ColorJitter(0.5, 0.5, 0.5, 0.5),
-                transforms.RandomHorizontalFlip(),
+                transforms.CenterCrop(args.input_size),
+                transforms.ColorJitter(0.4, 0.4, 0.4),
+                transforms.RandomHorizontalFlip(p=0.5),
+                # transforms.RandomRotation(10),
                 RandomResizedCropAndInterpolationWithTwoPic(
                     size=args.input_size, second_size=args.second_input_size,
                     scale=(0.2, 1.0),
@@ -89,6 +97,7 @@ class DataAugmentationForBEiT(object):
                 mean=torch.tensor(mean),
                 std=torch.tensor(std))
         ])
+
 
         if args.discrete_vae_type == "dall-e":
             self.visual_token_transform = transforms.Compose([
@@ -127,24 +136,7 @@ class DataAugmentationForBEiT(object):
         repr += ")"
         return repr
 
-        
-# def build_beit_pretraining_dataset(args):
-#     transform = DataAugmentationForBEiT(args)
-#     print("Data Aug = %s" % str(transform))
     
-#     data_all = np.load(os.path.join('./data/', args.dataset + '.npy'), allow_pickle = True)
-#     data_all = data_all.item()
-#     self.data_all = data_all[args.split_type]
-    
-#     if args.data_set == 'CIFAR10' or args.data_set == 'CIFAR100':
-#         self.data = self.data_all['data'][args.single_client]
-#         self.labels = self.data_all['target'][args.single_client]
-            
-    #     return datasets.CIFAR10(args.data_path, train=True, transform=transform)
-    # else:
-    #     return ImageFolder(args.data_path, transform=transform)
-
-
 def build_dataset(is_train, args):
     transform = build_transform(is_train, args)
 
@@ -195,9 +187,11 @@ def build_transform(is_train, args):
         mean = IMAGENET_INCEPTION_MEAN if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_MEAN
         std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
     elif args.data_set == 'Retina':
-            mean, std = (0.485,0.456,0.406), (0.229,0.224,0.225)
+        mean, std = RETINA_MEAN, RETINA_STD
+    elif args.data_set == 'COVIDx':
+        mean, std = COVIDX_MEAN, COVIDX_STD
     else:
-        mean, std = (0.5, 0.5, 0.5), (0.25, 0.25, 0.25)
+        mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
     
     if args.data_set == 'CIFAR10':
         if is_train:
@@ -235,19 +229,18 @@ def build_transform(is_train, args):
         if is_train:
             if args.data_set == 'Retina':
                 transform = transforms.Compose([
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.4, 1.)),
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.)),
                     transforms.RandomRotation(degrees=10),
-                    # transforms.RandomGrayscale(p=0.2),
-                    # transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(
                         mean=torch.tensor(mean),
                         std=torch.tensor(std))
                     ])
-            else:
+            elif args.data_set == 'COVIDx':
+                transforms.CenterCrop(args.input_size),
                 transform = transforms.Compose([
-                    transforms.RandomRotation(degrees=15),
+                    transforms.RandomRotation(degrees=10),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(

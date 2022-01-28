@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from skimage.transform import resize
 
 import random
+import cv2
 import torch
 import torch.utils.data as data
 from torchvision import transforms
@@ -17,6 +18,7 @@ from torchvision import transforms
 class DatasetFLBEiTPretrain(data.Dataset):
     def __init__(self, args, no_transform=False):    
         self.transform = None
+        
         if args.data_set == 'CIFAR10':
             
             data_all = np.load(os.path.join('./data/', args.data_set + '.npy'), allow_pickle = True)
@@ -27,7 +29,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
             self.labels = self.data_all['target'][args.single_client]
             
         elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
-
+            
             cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
@@ -36,6 +38,11 @@ class DatasetFLBEiTPretrain(data.Dataset):
         
         if no_transform == False:
             self.transform = DataAugmentationForBEiT(args)
+        else:
+            self.transform = transforms.Compose([
+                transforms.Resize(args.input_size),
+                transforms.ToTensor(),
+            ])
             
         self.args = args
 
@@ -52,7 +59,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
                 
         else:
             index = index % len(self.img_paths)
-
+            
             path = os.path.join(self.args.data_path, 'train', self.img_paths[index])
             name = self.img_paths[index]
 
@@ -61,10 +68,10 @@ class DatasetFLBEiTPretrain(data.Dataset):
             
             if self.args.data_set == 'Retina':
                 img = np.load(path)
-                img = resize(img, (320, 320))
+                img = resize(img, (256, 256))
             else:
                 img = np.array(Image.open(path))
-                img = process_covidx_image(img, size=224)
+                img = process_covidx_image(img, size=256)
             
             # print(np.max(img), np.min(img))
             if img.ndim < 3:
@@ -73,14 +80,8 @@ class DatasetFLBEiTPretrain(data.Dataset):
                 img = img[:,:,:3]
         
         if self.transform is not None:
-            # print(self.transform)
             img = Image.fromarray(np.uint8(img))
             sample = self.transform(img)
-        
-        else:
-            img *= 1/255
-            # img = np.transpose(2,1,0)
-            sample = torch.from_numpy(img).float()
             
         return sample, target
 
@@ -94,10 +95,8 @@ class DatasetFLBEiTPretrain(data.Dataset):
 class DatasetFLBEiT(data.Dataset):
     def __init__(self, args, phase):
         super(DatasetFLBEiT, self).__init__()
-        self.phase = phase
-
+        self.phase = phase        
         is_train = (phase == 'train')
-        self.transform = build_transform(is_train, args)
         
         # CIFAR dataset
         if args.data_set == 'CIFAR10':
@@ -126,6 +125,7 @@ class DatasetFLBEiT(data.Dataset):
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
         
+        self.transform = build_transform(is_train, args)
         self.args = args
     
     
@@ -158,7 +158,7 @@ class DatasetFLBEiT(data.Dataset):
                 img = resize(img, (256, 256))
             else:
                 img = np.array(Image.open(path))
-                img = process_covidx_image(img, size=224)
+                img = process_covidx_image(img, size=256)
             
             # print(np.max(img), np.min(img))
             if img.ndim < 3:
@@ -167,41 +167,10 @@ class DatasetFLBEiT(data.Dataset):
                 img = img[:,:,:3]
         
         if self.transform is not None:
-            # print(self.transform)
             img = Image.fromarray(np.uint8(img))
             sample = self.transform(img)
-        
-        else:
-            img *= 1/255
-            # img = np.transpose(2,1,0)
-            sample = torch.from_numpy(img).float()
             
-#         elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDx':
-#             index = index % len(self.img_paths)
-
-#             path = os.path.join(self.args.data_path, self.phase, self.img_paths[index])
-#             name = self.img_paths[index]
-            
-#             target = self.labels[name]
-#             target = np.asarray(target).astype('int64')
-            
-#             if self.args.data_set == 'Retina':
-#                 img = np.load(path)
-#                 img = resize(img, (256, 256))
-#             else:
-#                 img = np.array(Image.open(path))
-#                 # img = process_covidx_image(img, size=480)
-#                 img = img * 255
-            
-        # if self.transform is not None:
-        #     print('transform: ', self.transform)
-        #     sample = Image.fromarray(np.uint8(img))
-        #     sample = self.transform(sample)
-        # else:
-        #     sample = torch.tensor(img)
-        
         return sample, target
-
 
     def __len__(self):
         if self.args.data_set == 'CIFAR10':
@@ -302,7 +271,7 @@ def central_crop(img):
     offset_w = int((img.shape[1] - size) / 2)
     return img[offset_w:offset_w + size, offset_h:offset_h + size]
 
-def process_covidx_image(img, size=224, top_percent=0.08, crop=True):
+def process_covidx_image(img, size=224, top_percent=0.08, crop=False):
     img = crop_top(img, percent=top_percent)
     if crop:
         img = central_crop(img)
