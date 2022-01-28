@@ -5,6 +5,9 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 def non_iid_split_dirichlet(y_train, n_clients, n_classes, beta=0.4):
     min_size = 0
@@ -105,11 +108,12 @@ def data_split(data_path, n_clients, n_classes, beta_list=[100, 1, 0.5]):
     # print([{client_id:len(paths)} for client_id, paths in net_dataidx_map.items()])
 
     
-def view_split(data_path, n_clients):
+def view_split(data_path, n_clients, save_plot=False):
     
     labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
               open(os.path.join(data_path, 'labels.csv'))}
     
+    out={}
     for split_id in range(3):
         dist={}
         for k in range(n_clients):
@@ -117,10 +121,24 @@ def view_split(data_path, n_clients):
             img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             # print(img_paths[:5])
             dist[f'client_{k+1}'] = Counter([label for fname, label in labels.items() if fname in img_paths])
-        print(f'split_{split_id+1}: ', dist)
+        out[f'split_{split_id+1}'] = dist
+        # print(f'split_{split_id+1}: ', dist)
+    
+    if save_plot:
+        df = pd.DataFrame(out)
+        for split_id in range(3):
+            df_split = df.iloc[:,split_id].apply(pd.Series)
+            df_split['client_id'] = df_split.index
+            df_split['client_id'] = df_split['client_id']
+            df_split.plot(x='client_id', kind='barh', rot=0, stacked=True, colormap='tab20c', title=f'split{split_id+1}')
+            plt.legend(title='class', loc='upper right')
+            plt.savefig(f"/home/yan/SSL-FL/plots/split{split_id+1}.png")
+            plt.show()
+    
+    return out
 
-data_path='/data/yan/SSL-FL/Retina'
-# data_split(data_path, 5, 2)
-view_split(data_path, 5)
+# data_path='/data/yan/SSL-FL/Retina'
+# # data_split(data_path, 5, 2)
+# view_split(data_path, 5)
 
 # Test Retina splits
