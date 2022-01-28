@@ -44,82 +44,49 @@ def save_model(args, model):
 
 
 def inner_valid(args, model, data_loader):
-    # eval_losses = AverageMeter()
-    criterion = torch.nn.CrossEntropyLoss()
-    metric_logger = utils.MetricLogger(delimiter="  ")
-    header = 'Test:'
-    # switch to evaluation mode
+    eval_losses = AverageMeter()
     model.eval()
     
-    print("++++++ Running Validation ++++++")
-    for batch in metric_logger.log_every(data_loader, 10, header):
-        images = batch[0]
-        target = batch[-1]
-        images = images.to(args.device, non_blocking=True)
-        target = target.to(args.device, non_blocking=True)
-
-        # compute output
-        # with torch.cuda.amp.autocast():
+    print("++++++ Running Validation of client", args.single_client, "++++++")
+    all_preds, all_label = [], []
+    loss_fct = torch.nn.CrossEntropyLoss()
+    
+    for batch in data_loader:
+        batch = tuple(t.to(args.device) for t in batch)
+        x, y = batch
+        
         with torch.no_grad():
-            output = model(images)
-            loss = criterion(output, target)
-
-        acc1, _ = accuracy(output, target, topk=(1, 2))
-
-        batch_size = images.shape[0]
-        metric_logger.update(loss=loss.item())
-        metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
-        # metric_logger.meters['acc5'].update(acc5.item(), n=batch_size)
-    # gather the stats from all processes
-    # metric_logger.synchronize_between_processes()
-    print('* Acc@1 {top1.global_avg:.3f} loss {losses.global_avg:.3f}'
-          .format(top1=metric_logger.acc1,losses=metric_logger.loss))
-    # print('* Acc@1 {top1.global_avg:.3f} Acc@5 {top5.global_avg:.3f} loss {losses.global_avg:.3f}'
-          # .format(top1=metric_logger.acc1, top5=metric_logger.acc5, losses=metric_logger.loss))
-    
-    return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-
-#     all_preds, all_label = [], []
-    
-#     loss_fct = torch.nn.CrossEntropyLoss()
-#     for batch in test_loader:
-#         batch = tuple(t.to(args.device) for t in batch)
-#         x, y = batch
-
-#         with torch.no_grad():
-#             # if not args.Use_ResNet:
-#             #     logits = model(x)[0]
-#             # else:
-#             logits = model(x)
+            logits = model(x)
             
-#             if args.nb_classes > 1:
-#                 eval_loss = loss_fct(logits, y)
-#                 eval_losses.update(eval_loss.item())
+            if args.nb_classes > 1:
+                eval_loss = loss_fct(logits, y)
+                eval_losses.update(eval_loss.item())
+            
+            if args.nb_classes > 1:
+                preds = torch.argmax(logits, dim=-1)
+            else:
+                preds = logits
+        
+        if len(all_preds) == 0:
+            all_preds.append(preds.detach().cpu().numpy())
+            all_label.append(y.detach().cpu().numpy())
+        else:
+            all_preds[0] = np.append(
+                all_preds[0], preds.detach().cpu().numpy(), axis=0
+            )
+            all_label[0] = np.append(
+                all_label[0], y.detach().cpu().numpy(), axis=0
+            )
+            
+    all_preds, all_label = all_preds[0], all_label[0]
+    if not args.nb_classes == 1:
+        eval_result = simple_accuracy(all_preds, all_label)
+    else:
+        eval_result =  mean_squared_error(all_preds, all_label)
 
-#             if args.nb_classes > 1:
-#                 preds = torch.argmax(logits, dim=-1)
-#             else:
-#                 preds = logits
+    model.train()
 
-#         if len(all_preds) == 0:
-#             all_preds.append(preds.detach().cpu().numpy())
-#             all_label.append(y.detach().cpu().numpy())
-#         else:
-#             all_preds[0] = np.append(
-#                 all_preds[0], preds.detach().cpu().numpy(), axis=0
-#             )
-#             all_label[0] = np.append(
-#                 all_label[0], y.detach().cpu().numpy(), axis=0
-#             )
-#     all_preds, all_label = all_preds[0], all_label[0]
-#     if not args.nb_classes == 1:
-#         eval_result = simple_accuracy(all_preds, all_label)
-#     else:
-#         eval_result =  mean_squared_error(all_preds, all_label)
-
-    # model.train()
-
-    # return eval_result, eval_losses
+    return eval_result, eval_losses
 
 
 def metric_evaluation(args, eval_result):
@@ -138,28 +105,26 @@ def metric_evaluation(args, eval_result):
 
 def valid(args, model, data_loader_val, data_loader_test = None, TestFlag = False):
     # Validation!
-    return inner_valid(args, model, data_loader_val)
+    eval_result, eval_losses = inner_valid(args, model, data_loader_val)
     
-    # eval_result, eval_losses = inner_valid(args, model, data_loader_val)
-    
-#     print("Valid Loss: %2.5f" % eval_losses.avg, "Valid Accuracy: %2.5f" % eval_result)
-#     if metric_evaluation(args, eval_result):
-#         # if args.save_model_flag:
-#         #     save_model(args, model)
+    print("Valid Loss: %2.5f" % eval_losses.avg, "Valid Accuracy: %2.5f" % eval_result)
+    if metric_evaluation(args, eval_result):
+        if args.save_model_flag:
+            save_model(args, model)
         
-#         args.best_acc[args.single_client] = eval_result
-#         args.best_eval_loss[args.single_client] = eval_losses.val
-#         print("The updated best acc of client", args.single_client, args.best_acc[args.single_client])
+        args.best_acc[args.single_client] = eval_result
+        args.best_eval_loss[args.single_client] = eval_losses.val
+        print("The updated best acc of client", args.single_client, args.best_acc[args.single_client])
 
-#         if TestFlag:
-#             test_result, eval_losses = inner_valid(args, model, data_loader_test)
-#             args.current_test_acc[args.single_client] = test_result
-#             print('We also update the test acc of client', args.single_client, 'as',
-#                   args.current_test_acc[args.single_client])
-#     else:
-#         print("Donot replace previous best acc of client", args.best_acc[args.single_client])
+        if TestFlag:
+            test_result, eval_losses = inner_valid(args, model, data_loader_test)
+            args.current_test_acc[args.single_client] = test_result
+            print('We also update the test acc of client', args.single_client, 'as',
+                  args.current_test_acc[args.single_client])
+    else:
+        print("Donot replace previous best acc of client", args.best_acc[args.single_client])
 
-#     args.current_acc[args.single_client] = eval_result
+    args.current_acc[args.single_client] = eval_result
 
 
 def Partial_Client_Selection(args, model, mode='pretrain'):
@@ -395,7 +360,6 @@ def average_model(args, model_avg, model_all):
             single_client_weight = args.clients_weightes[single_client]
             single_client_weight = torch.from_numpy(np.array(single_client_weight)).float()
             
-            # print(client, ' weight: ', single_client_weight)
             if client == 0:
                 tmp_param_data = dict(model_all[single_client].named_parameters())[
                                      name].data * single_client_weight
@@ -404,7 +368,7 @@ def average_model(args, model_avg, model_all):
                                  dict(model_all[single_client].named_parameters())[
                                      name].data * single_client_weight
         params[name].data.copy_(tmp_param_data)
-        
+    
     print('Update each client model parameters----')
     
     for single_client in args.proxy_clients:
