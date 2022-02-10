@@ -30,8 +30,12 @@ class DatasetFLBEiTPretrain(data.Dataset):
             
         elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
             
-            cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
-                                          args.split_type, args.single_client)
+            if args.split_type == 'central':
+                cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
+            else:
+                cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
+                                              args.split_type, args.single_client)
+                
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
@@ -120,8 +124,12 @@ class DatasetFLBEiT(data.Dataset):
             elif self.phase == 'val':
                 args.single_client = os.path.join(args.data_path, 'val.csv')
             
-            cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
-                                          args.split_type, args.single_client)
+            if args.split_type == 'central':
+                cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
+            else:
+                cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
+                                              args.split_type, args.single_client)
+                
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
@@ -197,13 +205,21 @@ def create_dataset_and_evalmetrix(args, mode='pretrain'):
         args.clients_with_len = {name: data_all['data'][name].shape[0] for name in args.dis_cvs_files}
     
     elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
-        args.dis_cvs_files = os.listdir(os.path.join(args.data_path, f'{args.n_clients}_clients', args.split_type))
+        if args.split_type == 'central':
+            args.dis_cvs_files = os.listdir(os.path.join(args.data_path, args.split_type))
+        else:
+            args.dis_cvs_files = os.listdir(os.path.join(args.data_path, f'{args.n_clients}_clients', args.split_type))
+        
         args.clients_with_len = {}
         
         for single_client in args.dis_cvs_files:
-            img_paths = list({line.strip().split(',')[0] for line in
-                              open(os.path.join(args.data_path, f'{args.n_clients}_clients',
-                                                args.split_type, single_client))})
+            if args.split_type == 'central':
+                img_paths = list({line.strip().split(',')[0] for line in
+                              open(os.path.join(args.data_path, args.split_type, single_client))})
+            else:
+                img_paths = list({line.strip().split(',')[0] for line in
+                                  open(os.path.join(args.data_path, f'{args.n_clients}_clients',
+                                                    args.split_type, single_client))})
             args.clients_with_len[single_client] = len(img_paths)
     
     
