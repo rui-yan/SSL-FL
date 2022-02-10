@@ -88,7 +88,7 @@ def data_split(data_path, n_clients, n_classes, beta_list=[100, 1, 0.5]):
     for split_id, beta in enumerate(beta_list):
         print(f'\n-------split_{split_id+1}-------')
         
-        split_path = data_path + f'/split_{split_id+1}'
+        split_path = data_path+f'/{n_clients}_clients'+f'/split_{split_id+1}'
         if not os.path.exists(split_path):
             os.makedirs(split_path)
         
@@ -117,7 +117,7 @@ def view_split(data_path, n_clients, save_plot=False):
     for split_id in range(3):
         dist={}
         for k in range(n_clients):
-            cur_clint_path = os.path.join(data_path, f'split_{split_id+1}', f'client_{k+1}.csv')
+            cur_clint_path = os.path.join(data_path, f'{n_clients}_clients', f'split_{split_id+1}', f'client_{k+1}.csv')
             img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             # print(img_paths[:5])
             dist[f'client_{k+1}'] = Counter([label for fname, label in labels.items() if fname in img_paths])
@@ -132,13 +132,14 @@ def view_split(data_path, n_clients, save_plot=False):
             df_split['client_id'] = df_split['client_id']
             df_split.plot(x='client_id', kind='barh', rot=0, stacked=True, colormap='tab20c', title=f'split{split_id+1}')
             plt.legend(title='class', loc='upper right')
-            plt.savefig(f"/home/yan/SSL-FL/plots/split{split_id+1}.png")
+            plt.savefig(f"/home/yan/SSL-FL/plots/{n_clients}_clients/split{split_id+1}.png")
             plt.show()
     
     return out
 
-# data_path='/data/yan/SSL-FL/Retina'
-# # data_split(data_path, 5, 2)
-# view_split(data_path, 5)
+data_path='/data/yan/SSL-FL/Retina'
+data_split(data_path, 20, 2)
+# data_split(data_path, 5, 2)
+view_split(data_path, 20, save_plot=True)
 
 # Test Retina splits
