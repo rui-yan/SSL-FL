@@ -128,11 +128,13 @@ def view_split(data_path, n_clients, save_plot=False):
         df = pd.DataFrame(out)
         for split_id in range(3):
             df_split = df.iloc[:,split_id].apply(pd.Series)
-            df_split['client_id'] = df_split.index
-            df_split['client_id'] = df_split['client_id']
+            df_split = df_split.reindex(sorted(df_split.columns), axis=1)
+            df_split['client_id'] = sorted(df_split.index)
             df_split.plot(x='client_id', kind='barh', rot=0, stacked=True, colormap='tab20c', title=f'split{split_id+1}')
             plt.legend(title='class', loc='upper right')
-            plt.savefig(f"/home/yan/SSL-FL/plots/{n_clients}_clients/split{split_id+1}.png")
+
+            data_set = os.path.split(data_path)[1]
+            plt.savefig(f"/home/yan/SSL-FL/plots/{n_clients}_clients/{data_set}_split{split_id+1}.png")
             plt.show()
     
     return out
@@ -141,5 +143,3 @@ data_path='/data/yan/SSL-FL/Retina'
 data_split(data_path, 20, 2)
 # data_split(data_path, 5, 2)
 view_split(data_path, 20, save_plot=True)
-
-# Test Retina splits
