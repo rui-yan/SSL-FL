@@ -25,7 +25,8 @@ def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
                     cur_single_client,
                     max_norm: float = 0, 
                     proxy_single_client=None,
-                    log_writer=None, 
+                    log_writer=None,
+                    criterion=None,
                     lr_scheduler=None, start_steps=None,
                     lr_schedule_values=None, wd_schedule_values=None):
     model.train()
@@ -64,7 +65,8 @@ def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
 
         with torch.cuda.amp.autocast():
             outputs = model(samples, bool_masked_pos=bool_masked_pos, return_all_tokens=False)
-            loss = nn.CrossEntropyLoss()(input=outputs, target=labels)
+            loss = criterion(input=outputs, target=labels)
+            # loss = nn.CrossEntropyLoss()(input=outputs, target=labels)
 
         loss_value = loss.item()
 

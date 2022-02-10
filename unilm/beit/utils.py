@@ -428,8 +428,6 @@ def save_model(args, epoch, model, model_without_ddp, optimizer, loss_scaler, mo
     
     output_dir = Path(args.output_dir)
     epoch_name = str(epoch)
-    # client_name = os.path.basename(args.single_client).split('.')[0]
-    # print('client_name: ', client_name)
     
     if loss_scaler is not None:
         checkpoint_paths = [output_dir / ("checkpoint-%s.pth" % (epoch_name))]

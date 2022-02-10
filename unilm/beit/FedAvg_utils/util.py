@@ -4,13 +4,16 @@ import numpy as np
 from copy import deepcopy
 
 import torch
+import torch.nn as nn
 import sys
 sys.path.insert(0,'..')
 
-from optim_factory import create_optimizer, get_parameter_groups, LayerDecayValueAssigner
 import utils
 from utils import NativeScalerWithGradNormCount as NativeScaler
-from timm.utils import accuracy
+from timm.utils import accuracy, ModelEma
+from timm.data.mixup import Mixup
+from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
+from optim_factory import create_optimizer, get_parameter_groups, LayerDecayValueAssigner
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -164,6 +167,8 @@ def valid(args, model, data_loader_val, data_loader_test = None, TestFlag = Fals
 
 def Partial_Client_Selection(args, model, mode='pretrain'):
 
+    device = torch.device(args.device)
+        
     # Select partial clients join in FL train
     if args.num_local_clients == -1: # all the clients joined in the train
         args.proxy_clients = args.dis_cvs_files
@@ -174,9 +179,11 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
     # Generate model for each client
     model_all = {}
     optimizer_all = {}
+    criterion_all = {}
     lr_scheduler_all = {}
     wd_scheduler_all = {}
     loss_scaler_all = {}
+    mixup_fn_all = {}
     args.learning_rate_record = {}
     args.t_total = {}
     
@@ -303,15 +310,29 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
                 checkpoint_model['pos_embed'] = new_pos_embed
 
         utils.load_state_dict(model, checkpoint_model, prefix=args.model_prefix)
+        
+    model = model.to(device)
     
+    if args.distributed:
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
+        # print("Model = %s" % str(model))
+            
     for proxy_single_client in args.proxy_clients:
         # model_all
-        model_all[proxy_single_client] = deepcopy(model).cpu()
+        # model_all[proxy_single_client] = deepcopy(model).cpu()
+        model_all[proxy_single_client] = deepcopy(model)
+        
+        if args.distributed:
+            model_without_ddp = model_all[proxy_single_client].module
+        else:
+            model_without_ddp = model_all[proxy_single_client]
+        
         # optimizer_all
         if mode == 'pretrain':
-            optimizer_all[proxy_single_client] = create_optimizer(args, model_all[proxy_single_client])
+            optimizer_all[proxy_single_client] = create_optimizer(args, model_without_ddp)
+        
         else: # mode == 'finetune'
-            num_layers = model_all[proxy_single_client].get_num_layers()
+            num_layers = model_without_ddp.get_num_layers()
             
             if args.layer_decay < 1.0:
                 assigner = LayerDecayValueAssigner(list(args.layer_decay ** (num_layers + 1 - i) for i in range(num_layers + 2)))
@@ -321,12 +342,12 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
             if assigner is not None:
                 print("Assigned values = %s" % str(assigner.values))
             
-            skip_weight_decay_list = model_all[proxy_single_client].no_weight_decay()
+            skip_weight_decay_list = model_without_ddp.no_weight_decay()
             if args.disable_weight_decay_on_rel_pos_bias:
                 for i in range(num_layers):
                     skip_weight_decay_list.add("blocks.%d.attn.relative_position_bias_table" % i)
             
-            optimizer_all[proxy_single_client] = create_optimizer(args, model_all[proxy_single_client],
+            optimizer_all[proxy_single_client] = create_optimizer(args, model_without_ddp,
                                                           skip_list=skip_weight_decay_list,
                                                           get_num_layer=assigner.get_layer_id if assigner is not None else None, 
                                                           get_layer_scale=assigner.get_scale if assigner is not None else None)
@@ -354,6 +375,29 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         # get the total decay steps first
         args.t_total[proxy_single_client] = num_training_steps_per_inner_epoch * args.E_epoch * args.max_communication_rounds
         
+        # criterion_all
+        if mode == 'pretrain':
+            criterion_all[proxy_single_client] = nn.CrossEntropyLoss()
+        else:
+            mixup_fn = None
+            mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
+            if mixup_active:
+                print("Mixup is activated!")
+                mixup_fn = Mixup(
+                    mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
+                    prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
+                    label_smoothing=args.smoothing, num_classes=args.nb_classes)
+            mixup_fn_all[proxy_single_client] = mixup_fn
+            
+            if mixup_fn is not None:
+                # smoothing is handled with mixup label transform
+                criterion = SoftTargetCrossEntropy()
+            elif args.smoothing > 0.:
+                criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
+            else:
+                criterion = torch.nn.CrossEntropyLoss()
+            criterion_all[proxy_single_client] = criterion
+            
         # lr_scheduler_all
         print("Use step level LR & WD scheduler!")
         lr_scheduler_all[proxy_single_client] = utils.cosine_scheduler(args.lr, args.min_lr, 
@@ -379,15 +423,18 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
     
     args.clients_weightes = {}
     args.global_step_per_client = {name: 0 for name in args.proxy_clients}
-
-    return model_all, optimizer_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all
+    
+    if mode == 'pretrain':
+        return model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all
+    else:
+        return model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all, mixup_fn_all
 
 
 def average_model(args, model_avg, model_all):
     model_avg.cpu()
     print('Calculate the model avg----')
     params = dict(model_avg.named_parameters())
-    
+        
     for name, param in params.items():
         for client in range(len(args.proxy_clients)):
             single_client = args.proxy_clients[client]
@@ -395,19 +442,23 @@ def average_model(args, model_avg, model_all):
             single_client_weight = args.clients_weightes[single_client]
             single_client_weight = torch.from_numpy(np.array(single_client_weight)).float()
             
-            # print(client, ' weight: ', single_client_weight)
             if client == 0:
-                tmp_param_data = dict(model_all[single_client].named_parameters())[
+                tmp_param_data = dict(model_all[single_client].module.named_parameters())[
                                      name].data * single_client_weight
             else:
                 tmp_param_data = tmp_param_data + \
-                                 dict(model_all[single_client].named_parameters())[
+                                 dict(model_all[single_client].module.named_parameters())[
                                      name].data * single_client_weight
         params[name].data.copy_(tmp_param_data)
         
     print('Update each client model parameters----')
     
     for single_client in args.proxy_clients:
-        tmp_params = dict(model_all[single_client].named_parameters())
+        
+        # print('debug: ', dict(model_all[single_client].module.named_parameters()).keys())
+        tmp_params = dict(model_all[single_client].module.named_parameters())
         for name, param in params.items():
+            # print(tmp_params[name].data)
+            # print(params[name].data)
+            # exit(0)
             tmp_params[name].data.copy_(param.data)

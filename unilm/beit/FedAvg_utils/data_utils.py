@@ -21,7 +21,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
         
         if args.data_set == 'CIFAR10':
             
-            data_all = np.load(os.path.join('./data/', args.data_set + '.npy'), allow_pickle = True)
+            data_all = np.load(os.path.join(args.data_path, args.data_set + '.npy'), allow_pickle = True)
             data_all = data_all.item()
             
             self.data_all = data_all[args.split_type]            
@@ -30,12 +30,13 @@ class DatasetFLBEiTPretrain(data.Dataset):
             
         elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
             
-            cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
+            cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
+                                          args.split_type, args.single_client)
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
-        
+            
         if no_transform == False:
             self.transform = DataAugmentationForBEiT(args)
         else:
@@ -100,7 +101,7 @@ class DatasetFLBEiT(data.Dataset):
         
         # CIFAR dataset
         if args.data_set == 'CIFAR10':
-            data_all = np.load(os.path.join('./data/', args.data_set + '.npy'), allow_pickle = True)
+            data_all = np.load(os.path.join(args.data_path, args.data_set + '.npy'), allow_pickle = True)
             data_all = data_all.item()
             
             self.data_all = data_all[args.split_type]
@@ -119,7 +120,8 @@ class DatasetFLBEiT(data.Dataset):
             elif self.phase == 'val':
                 args.single_client = os.path.join(args.data_path, 'val.csv')
             
-            cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
+            cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
+                                          args.split_type, args.single_client)
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
@@ -127,7 +129,6 @@ class DatasetFLBEiT(data.Dataset):
         
         self.transform = build_transform(is_train, args)
         self.args = args
-    
     
     def __getitem__(self, index):
         """
@@ -143,7 +144,7 @@ class DatasetFLBEiT(data.Dataset):
         
         else:
             index = index % len(self.img_paths)
-
+            
             path = os.path.join(self.args.data_path, self.phase, self.img_paths[index])
             name = self.img_paths[index]
             
@@ -188,7 +189,7 @@ def create_dataset_and_evalmetrix(args, mode='pretrain'):
     if args.data_set == 'CIFAR10':
 
         # get the client with number
-        data_all = np.load(os.path.join('./data/', args.data_set + '.npy'), allow_pickle = True)
+        data_all = np.load(os.path.join(args.data_path, args.data_set + '.npy'), allow_pickle = True)
         data_all = data_all.item()
 
         data_all = data_all[args.split_type]
@@ -196,12 +197,13 @@ def create_dataset_and_evalmetrix(args, mode='pretrain'):
         args.clients_with_len = {name: data_all['data'][name].shape[0] for name in args.dis_cvs_files}
     
     elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
-        args.dis_cvs_files = os.listdir(os.path.join(args.data_path, args.split_type))
+        args.dis_cvs_files = os.listdir(os.path.join(args.data_path, f'{args.n_clients}_clients', args.split_type))
         args.clients_with_len = {}
         
         for single_client in args.dis_cvs_files:
             img_paths = list({line.strip().split(',')[0] for line in
-                              open(os.path.join(args.data_path, args.split_type, single_client))})
+                              open(os.path.join(args.data_path, f'{args.n_clients}_clients',
+                                                args.split_type, single_client))})
             args.clients_with_len[single_client] = len(img_paths)
     
     
