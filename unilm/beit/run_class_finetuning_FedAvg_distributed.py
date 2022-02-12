@@ -360,8 +360,6 @@ def main(args, ds_init, model):
             
             # ---- prepare model for a client
             model = model_all[proxy_single_client]
-            model = model.to(device)
-            
             optimizer = optimizer_all[proxy_single_client]
             criterion = criterion_all[proxy_single_client]
             lr_schedule_values = lr_scheduler_all[proxy_single_client]
@@ -369,8 +367,8 @@ def main(args, ds_init, model):
             loss_scaler = loss_scaler_all[proxy_single_client]
             mixup_fn = mixupfn_all[proxy_single_client]
             
-            print("criterion = %s" % str(criterion))
-            print("mixup_fn = %s" % str(mixup_fn))
+            # print("criterion = %s" % str(criterion))
+            # print("mixup_fn = %s" % str(mixup_fn))
             
             if args.distributed:
                 model_without_ddp = model.module
@@ -378,16 +376,16 @@ def main(args, ds_init, model):
                 model_without_ddp = model
                         
             model_ema = None
-            if args.model_ema:
-                # Important to create EMA model after cuda(), DP wrapper, and AMP but before SyncBN and DDP wrapper
-                model_ema = ModelEma(
-                    model,
-                    decay=args.model_ema_decay,
-                    device='cpu' if args.model_ema_force_cpu else '',
-                    resume='')
-                print("Using EMA with decay = %.8f" % args.model_ema_decay)
+            # if args.model_ema:
+            #     # Important to create EMA model after cuda(), DP wrapper, and AMP but before SyncBN and DDP wrapper
+            #     model_ema = ModelEma(
+            #         model,
+            #         decay=args.model_ema_decay,
+            #         device='cpu' if args.model_ema_force_cpu else '',
+            #         resume='')
+            #     print("Using EMA with decay = %.8f" % args.model_ema_decay)
             
-            n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            # n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
             # print("Model = %s" % str(model_without_ddp))
             # print('number of params:', n_parameters)
             total_batch_size = args.batch_size * args.update_freq * utils.get_world_size()
@@ -398,6 +396,11 @@ def main(args, ds_init, model):
             print("Number of training examples = %d" % len(dataset_train))
             print("Number of training training per epoch = %d" % num_training_steps_per_inner_epoch)
             
+            if args.distributed:
+                data_loader_train.sampler.set_epoch(epoch)
+            if log_writer is not None:
+                log_writer.set_step(epoch)
+                
             if args.eval:
                 utils.auto_load_model(
                     args=args, model=model, model_without_ddp=model_without_ddp,
@@ -410,14 +413,7 @@ def main(args, ds_init, model):
                 
                 exit(0)
             
-            print(f"Start training for {args.E_epoch} inner epochs")
             for inner_epoch in range(args.E_epoch):
-                if args.distributed:
-                    data_loader_train.sampler.set_epoch(inner_epoch)
-                if log_writer is not None:
-                    # print('log_writer.step: ', log_writer.step)
-                    # print('epoch + inner_epoch: ',  epoch + inner_epoch)
-                    log_writer.set_step(epoch + inner_epoch)
 
                 # ============ training one epoch of BEiT  ============
                 train_stats = train_one_epoch(args, model, criterion, data_loader_train, optimizer,
@@ -454,7 +450,8 @@ def main(args, ds_init, model):
             # print('Training time {}'.format(total_time_str))
             
             # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory
-            model.to('cpu')
+            # model.to('cpu')
+            
         # =========== model average and eval ============ 
         # average model
         average_model(args, model_avg, model_all)
@@ -501,7 +498,7 @@ def main(args, ds_init, model):
         
         print('global_step_per_client: ', args.global_step_per_client[proxy_single_client])
         print('t_total: ', args.t_total[proxy_single_client])
-            
+        
         if args.global_step_per_client[proxy_single_client] >= args.t_total[proxy_single_client]:
             total_time = time.time() - start_time
             total_time_str = str(datetime.timedelta(seconds=int(total_time)))

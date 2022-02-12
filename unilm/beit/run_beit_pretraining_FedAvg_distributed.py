@@ -131,6 +131,7 @@ def get_args():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--local_rank', default=-1, type=int)
+    parser.add_argument('--sync_bn', default=False, action='store_true')
     parser.add_argument('--dist_on_itp', action='store_true')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
     
@@ -191,6 +192,8 @@ def main(args, model):
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all = Partial_Client_Selection(args, model)
     model_avg = deepcopy(model).cpu()
+    # model = model.to(device)
+    # print('model_all: ', str(model_all))
     
     # prepare discrete vae
     d_vae = utils.create_d_vae(
@@ -249,19 +252,21 @@ def main(args, model):
                 batch_size=args.batch_size,
                 num_workers=args.num_workers,
                 pin_memory=args.pin_mem,
-                # drop_last=True,
+                drop_last=True,
                 )
-            print('train_data_len; ', len(data_loader_train))
+            # print('train_data_len; ', len(data_loader_train))
             
             # ---- prepare model for a client
             model = model_all[proxy_single_client]
-            model = model.to(device)
-            
             optimizer = optimizer_all[proxy_single_client]
             criterion = criterion_all[proxy_single_client]
             lr_schedule_values = lr_scheduler_all[proxy_single_client]
             wd_schedule_values = wd_scheduler_all[proxy_single_client]
             loss_scaler = loss_scaler_all[proxy_single_client]
+            
+            # print('model: ', model.module.named_parameters())
+            # print('device :', next(model.module.parameters()).device)
+            # model = model.to(device)
             
             if args.distributed:
                 model_without_ddp = model.module
@@ -283,7 +288,6 @@ def main(args, model):
                 log_writer.set_step(epoch)
             
             n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)            
-            
             total_batch_size = args.batch_size * num_tasks
             print("LR = %.8f" % args.lr)
             print("Batch size = %d" % total_batch_size)
@@ -328,7 +332,7 @@ def main(args, model):
                         f.write(json.dumps(log_stats) + "\n")
             
             # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory
-            model.to('cpu')
+            # model.to('cpu')            
         
         # average model
         average_model(args, model_avg, model_all)

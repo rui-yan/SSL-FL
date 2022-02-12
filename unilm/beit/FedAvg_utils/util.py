@@ -311,16 +311,16 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
 
         utils.load_state_dict(model, checkpoint_model, prefix=args.model_prefix)
         
-    model = model.to(device)
-    
     if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
-        # print("Model = %s" % str(model))
-            
+        if args.sync_bn:
+            "activate synchronized batch norm"
+            model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
+    
     for proxy_single_client in args.proxy_clients:
         # model_all
-        # model_all[proxy_single_client] = deepcopy(model).cpu()
         model_all[proxy_single_client] = deepcopy(model)
+        model_all[proxy_single_client] = model_all[proxy_single_client].to(device)
+        model_all[proxy_single_client] = torch.nn.parallel.DistributedDataParallel(model_all[proxy_single_client], device_ids=[args.gpu], find_unused_parameters=True)
         
         if args.distributed:
             model_without_ddp = model_all[proxy_single_client].module
@@ -430,6 +430,34 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         return model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all, mixup_fn_all
 
 
+# def average_model(args, model_avg, model_all):
+#     model_avg.cpu()
+#     print('Calculate the model avg----')
+#     params = dict(model_avg.named_parameters())
+        
+#     for name, param in params.items():
+#         for client in range(len(args.proxy_clients)):
+#             single_client = args.proxy_clients[client]
+#             single_client_weight = args.clients_weightes[single_client]
+#             single_client_weight = torch.from_numpy(np.array(single_client_weight)).float()
+            
+#             if client == 0:
+#                 tmp_param_data = dict(model_all[single_client].module.named_parameters())[
+#                                      name].data * single_client_weight
+#             else:
+#                 tmp_param_data = tmp_param_data + \
+#                                  dict(model_all[single_client].module.named_parameters())[
+#                                      name].data * single_client_weight
+#         params[name].data.copy_(tmp_param_data)
+        
+#     print('Update each client model parameters----')
+    
+#     for single_client in args.proxy_clients:
+#         tmp_params = dict(model_all[single_client].module.named_parameters())
+#         for name, param in params.items():
+#             tmp_params[name].data.copy_(param.data)
+
+
 def average_model(args, model_avg, model_all):
     model_avg.cpu()
     print('Calculate the model avg----')
@@ -443,20 +471,39 @@ def average_model(args, model_avg, model_all):
             single_client_weight = torch.from_numpy(np.array(single_client_weight)).float()
             
             if client == 0:
-                tmp_param_data = dict(model_all[single_client].module.named_parameters())[
-                                     name].data * single_client_weight
+                if args.distributed:
+                    tmp_param_data = dict(model_all[single_client].module.named_parameters())[
+                                         name].data * single_client_weight
+                else:
+                    tmp_param_data = dict(model_all[single_client].named_parameters())[
+                                         name].data * single_client_weight
             else:
-                tmp_param_data = tmp_param_data + \
-                                 dict(model_all[single_client].module.named_parameters())[
-                                     name].data * single_client_weight
+                if args.distributed:
+                    tmp_param_data = tmp_param_data + \
+                                     dict(model_all[single_client].module.named_parameters())[
+                                         name].data * single_client_weight
+                else:
+                    tmp_param_data = tmp_param_data + \
+                                     dict(model_all[single_client].named_parameters())[
+                                         name].data * single_client_weight
+        
         params[name].data.copy_(tmp_param_data)
         
     print('Update each client model parameters----')
     
+    # print('model_avg: ', next(model_avg.parameters()).device)
+    
     for single_client in args.proxy_clients:
         
         # print('debug: ', dict(model_all[single_client].module.named_parameters()).keys())
-        tmp_params = dict(model_all[single_client].module.named_parameters())
+        if args.distributed:
+            tmp_params = dict(model_all[single_client].module.named_parameters())
+        else:
+            tmp_params = dict(model_all[single_client].named_parameters())
+        
+        # print('local_rank: ', args.local_rank)
+        # print('model_all device: ', next(model_all[single_client].module.parameters()).device)
+            
         for name, param in params.items():
             # print(tmp_params[name].data)
             # print(params[name].data)
