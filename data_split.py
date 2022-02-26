@@ -140,6 +140,6 @@ def view_split(data_path, n_clients, save_plot=False):
     return out
 
 data_path='/data/yan/SSL-FL/Retina'
-data_split(data_path, 20, 2)
+# data_split(data_path, 20, 2)
 # data_split(data_path, 5, 2)
-view_split(data_path, 20, save_plot=True)
+view_split(data_path, 5, save_plot=True)
