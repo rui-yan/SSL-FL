@@ -42,7 +42,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
                           open(os.path.join(args.data_path, 'labels.csv'))}
             
         if no_transform == False:
-            self.transform = DataAugmentationForBEiT(args)
+            self.transform = DataAugmentationForPretrain(args)
         else:
             self.transform = transforms.Compose([
                 transforms.Resize(args.input_size),

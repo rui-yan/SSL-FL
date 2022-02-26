@@ -21,17 +21,20 @@ import os
 from pathlib import Path
 
 from timm.models import create_model
-from optim_factory import create_optimizer
-from engine_for_pretraining import train_one_epoch
+# from optim_factory import create_optimizer
+
 import utils
+
+import modeling_pretrain
+from engine_for_pretraining import train_one_epoch
+
+from copy import deepcopy
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
 from FedAvg_utils.data_utils import DatasetFLBEiTPretrain, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
-import modeling_pretrain
-from copy import deepcopy
 
 def get_args():
-    parser = argparse.ArgumentParser('BEiT pre-training script', add_help=False)
+    parser = argparse.ArgumentParser('BEiT pre-training', add_help=False)
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--save_ckpt_freq', default=20, type=int)
     parser.add_argument("--discrete_vae_weight_path", type=str)
@@ -101,7 +104,7 @@ def get_args():
     # Dataset parameters
     parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDx', 'CIFAR100', 
                                                                 'IMNET', 'Retina', 'image_folder'],
-                        type=str, help='ImageNet dataset path')
+                        type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
     parser.add_argument('--imagenet_default_mean_and_std', default=False, action='store_true')
@@ -174,8 +177,12 @@ def get_model(args):
 
 
 def main(args, model):
-        
+    
     utils.init_distributed_mode(args)
+    
+    print('job dir: {}'.format(os.path.dirname(os.path.realpath(__file__))))
+    print("{}".format(args).replace(', ', ',\n'))
+    
     device = torch.device(args.device)
     
     # fix the seed for reproducibility
@@ -192,13 +199,21 @@ def main(args, model):
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all = Partial_Client_Selection(args, model)
     model_avg = deepcopy(model).cpu()
-    # model = model.to(device)
-    # print('model_all: ', str(model_all))
+    args.model_name = args.model.split('_')[0]
+    print('model_name: ', args.model_name)
     
     # prepare discrete vae
     d_vae = utils.create_d_vae(
         weight_path=args.discrete_vae_weight_path, d_vae_type=args.discrete_vae_type,
         device=device, image_size=args.second_input_size)
+    
+    global_rank = utils.get_rank()
+    
+    if global_rank == 0 and args.log_dir is not None:
+        os.makedirs(args.log_dir, exist_ok=True)
+        log_writer = utils.TensorboardLogger(log_dir=args.log_dir)
+    else:
+        log_writer = None
     
     # ---------- Train! (use different clients)
     print("=============== Running pre-training ===============")
@@ -276,12 +291,6 @@ def main(args, model):
             # print("Model = %s" % str(model))
             # print("Model_without_ddp = %s" % str(model_without_ddp))
             
-            if global_rank == 0 and args.log_dir is not None:
-                os.makedirs(args.log_dir, exist_ok=True)
-                log_writer = utils.TensorboardLogger(log_dir=args.log_dir)
-            else:
-                log_writer = None
-            
             if args.distributed:
                 data_loader_train.sampler.set_epoch(epoch)
             if log_writer is not None:
@@ -327,8 +336,7 @@ def main(args, model):
                 if args.output_dir and utils.is_main_process():
                     if log_writer is not None:
                         log_writer.flush()
-                    with open(os.path.join(args.output_dir, "log.txt"), mode="a", 
-                              encoding="utf-8") as f:
+                    with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                         f.write(json.dumps(log_stats) + "\n")
             
             # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory

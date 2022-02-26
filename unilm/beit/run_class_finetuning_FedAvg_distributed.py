@@ -21,22 +21,23 @@ import os
 from pathlib import Path
 from timm.models import create_model
 
-from datasets import build_dataset
-from engine_for_finetuning import train_one_epoch, evaluate
+# from datasets import build_dataset
 
 import utils
-from scipy import interpolate
+# from scipy import interpolate
+
+import modeling_finetune
+from engine_for_finetuning import train_one_epoch, evaluate
+
+from copy import deepcopy
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
 from FedAvg_utils.data_utils import DatasetFLBEiT, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
 
-import modeling_finetune
-from copy import deepcopy
-
 def get_args():
     parser = argparse.ArgumentParser('BEiT fine-tuning and evaluation script for image classification', add_help=False)
+    parser.add_argument('--model_name', default='beit', type=str)
     parser.add_argument('--batch_size', default=64, type=int)
-    parser.add_argument('--epochs', default=30, type=int)
     parser.add_argument('--update_freq', default=1, type=int)
     parser.add_argument('--save_ckpt_freq', default=20, type=int)
     
@@ -190,11 +191,10 @@ def get_args():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--local_rank', default=-1, type=int)
+    parser.add_argument('--sync_bn', default=False, action='store_true')
     parser.add_argument('--dist_on_itp', action='store_true')
     parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
-
-    parser.add_argument('--enable_deepspeed', action='store_true', default=False)
     
     # FL related parameters
     parser.add_argument("--n_clients", default=5, type=int, help="Number of clients")
@@ -206,22 +206,7 @@ def get_args():
     parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "central"], 
                         default="central", help="Which data partitions to use")
     
-    
-    known_args, _ = parser.parse_known_args()
-
-    if known_args.enable_deepspeed:
-        try:
-            import deepspeed
-            from deepspeed import DeepSpeedConfig
-            parser = deepspeed.add_config_arguments(parser)
-            ds_init = deepspeed.initialize
-        except:
-            print("Please 'pip install deepspeed==0.4.0'")
-            exit(0)
-    else:
-        ds_init = None
-
-    return parser.parse_args(), ds_init
+    return parser.parse_args()
 
 def get_model(args):
     print(f"Creating model: {args.model}")
@@ -251,18 +236,15 @@ def get_model(args):
     
     return model
 
-def main(args, ds_init, model):
+def main(args, model):
     
     utils.init_distributed_mode(args)
     
-    if ds_init is not None:
-        utils.create_ds_config(args)
-        
     device = torch.device(args.device)
     
     # fix the seed for reproducibility
     utils.fix_random_seeds(args)
-
+    
     cudnn.benchmark = True
     
     # prepare dataset
@@ -272,7 +254,7 @@ def main(args, ds_init, model):
         dataset_val = None
     else:
         dataset_val = DatasetFLBEiT(args=args, phase='test')
-            
+    
     sampler_val = torch.utils.data.SequentialSampler(dataset_val)
     
     if dataset_val is not None:
@@ -297,7 +279,6 @@ def main(args, ds_init, model):
     else:
         log_writer = None
     
-    # ----------
     
     # ---------- Train! (use different clients)    
     print("=============== Running fine-tuning ===============")
@@ -374,7 +355,7 @@ def main(args, ds_init, model):
                 model_without_ddp = model.module
             else:
                 model_without_ddp = model
-                        
+            
             model_ema = None
             # if args.model_ema:
             #     # Important to create EMA model after cuda(), DP wrapper, and AMP but before SyncBN and DDP wrapper
@@ -385,7 +366,7 @@ def main(args, ds_init, model):
             #         resume='')
             #     print("Using EMA with decay = %.8f" % args.model_ema_decay)
             
-            # n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
             # print("Model = %s" % str(model_without_ddp))
             # print('number of params:', n_parameters)
             total_batch_size = args.batch_size * args.update_freq * utils.get_world_size()
@@ -414,7 +395,7 @@ def main(args, ds_init, model):
                 exit(0)
             
             for inner_epoch in range(args.E_epoch):
-
+                
                 # ============ training one epoch of BEiT  ============
                 train_stats = train_one_epoch(args, model, criterion, data_loader_train, optimizer,
                                               device, epoch,
@@ -506,7 +487,7 @@ def main(args, ds_init, model):
             break
 
 if __name__ == '__main__':
-    opts, ds_init = get_args()
+    opts = get_args()
     if opts.output_dir:
         Path(opts.output_dir).mkdir(parents=True, exist_ok=True)
     
@@ -519,9 +500,6 @@ if __name__ == '__main__':
     opts.best_acc = {}
     opts.current_acc = {}
     opts.current_test_acc = {}
-    
-    if opts.output_dir:
-        Path(opts.output_dir).mkdir(parents=True, exist_ok=True)
-        
+
     # run finetuning
-    main(opts, ds_init, model)
+    main(opts, model)

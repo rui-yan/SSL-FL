@@ -32,7 +32,7 @@ def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    # metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
     
@@ -113,7 +113,7 @@ def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
     
     if log_writer is not None:
         for k, v in metric_logger.meters.items():
-            if k in ['lr', 'min_lr', 'weight_decay', 'grad_norm', 'loss_scale']:
+            if k in ['lr', 'min_lr', 'weight_decay', 'grad_norm']:
                 log_writer.writer.add_scalar(proxy_single_client +'/opt/'+ k, v.global_avg, log_writer.step)  
             elif k in ['loss', 'mlm_acc', 'loss_scale']:
                 log_writer.writer.add_scalar(proxy_single_client +'/loss/'+ k, v.global_avg, log_writer.step) 

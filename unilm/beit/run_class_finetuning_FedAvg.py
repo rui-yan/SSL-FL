@@ -202,6 +202,7 @@ def get_args():
     parser.add_argument('--enable_deepspeed', action='store_true', default=False)
     
     # FL related parameters
+    parser.add_argument("--n_clients", default=5, type=int, help="Number of clients")
     parser.add_argument("--E_epoch", default=1, type=int, help="Local training epoch in FL")
     parser.add_argument("--max_communication_rounds", default=100, type=int,
                         help="Total communication rounds.")

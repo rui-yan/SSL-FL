@@ -158,18 +158,24 @@ def get_model(args):
         use_abs_pos_emb=args.abs_pos_emb,
         init_values=args.layer_scale_init_value,
     )
+    
+    # set patch_size and window_size for beit pretraining
+    patch_size = model.patch_embed.patch_size
+    print("patch size = %s" % str(patch_size))
+    args.window_size = (args.input_size // patch_size[0], args.input_size // patch_size[1])
+    args.patch_size = patch_size
         
     return model
 
 
 def main(args, model):
-    
-    device = torch.device(args.device)
-    
+        
     # fix the seed for reproducibility
     utils.init_distributed_mode(args)
     utils.fix_random_seeds(args)
-
+    
+    device = torch.device(args.device)
+    
     cudnn.benchmark = True
     
     # prepare output_dir to save model checkpoints
@@ -184,8 +190,7 @@ def main(args, model):
     
     # prepare discrete vae
     d_vae = utils.create_d_vae(
-        weight_path=args.discrete_vae_weight_path,
-        d_vae_type=args.discrete_vae_type,
+        weight_path=args.discrete_vae_weight_path, d_vae_type=args.discrete_vae_type,
         device=device, image_size=args.second_input_size)
     
     # ---------- Train! (use different clients)
@@ -194,6 +199,9 @@ def main(args, model):
     print('total_clients: ', tot_clients)
     epoch = -1
     
+    print(f"Start training for {args.max_communication_rounds} epochs")
+    start_time = time.time()
+            
     while True:
         print('eopch: ', epoch)
         epoch += 1
@@ -209,7 +217,7 @@ def main(args, model):
         cur_tot_client_Lens = 0
         for client in cur_selected_clients:
             cur_tot_client_Lens += args.clients_with_len[client]
-                
+        
         for cur_single_client, proxy_single_client in zip(cur_selected_clients, args.proxy_clients):
             print('cur_single_client: ', cur_single_client)
             print('proxy_single_client: ', proxy_single_client)
@@ -224,21 +232,29 @@ def main(args, model):
             lr_schedule_values = lr_scheduler_all[proxy_single_client]
             wd_schedule_values = wd_scheduler_all[proxy_single_client]
             loss_scaler = loss_scaler_all[proxy_single_client]
-            model_without_ddp = model
+            
+            if args.distributed:
+                model_without_ddp = model.module
+            else:
+                model_without_ddp = model
             
             # print('len(lr_schedule_values): ', len(lr_schedule_values))
             # print('len(wd_schedule_values): ', len(wd_schedule_values))
-            
-            # set patch_size and window_size for beit pretraining
-            patch_size = model.patch_embed.patch_size
-            print("patch size = %s" % str(patch_size))
-            args.window_size = (args.input_size // patch_size[0], args.input_size // patch_size[1])
-            args.patch_size = patch_size
-            
+                        
             # ---- get dataset for each client for pretraining
             dataset_train = DatasetFLBEiTPretrain(args)
-            sampler_train = torch.utils.data.RandomSampler(dataset_train)
             
+            num_tasks = utils.get_world_size()
+            global_rank = utils.get_rank()
+            sampler_rank = global_rank
+            num_training_steps_per_inner_epoch = len(dataset_train) // args.batch_size // num_tasks
+            
+            if args.distributed:
+                 sampler_train = torch.utils.data.DistributedSampler(
+                     dataset_train, num_replicas=num_tasks, rank=sampler_rank, shuffle=True)
+            else:    
+                sampler_train = torch.utils.data.RandomSampler(dataset_train)
+                    
             data_loader_train = torch.utils.data.DataLoader(
                 dataset_train, sampler=sampler_train,
                 batch_size=args.batch_size,
@@ -247,33 +263,26 @@ def main(args, model):
                 # drop_last=True,
             )
             
-            n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)            
-            global_rank = utils.get_rank()
-            num_tasks = utils.get_world_size()
-            num_training_steps_per_inner_epoch = len(dataset_train) // args.batch_size // num_tasks
-            
             if global_rank == 0 and args.log_dir is not None:
                 os.makedirs(args.log_dir, exist_ok=True)
                 log_writer = utils.TensorboardLogger(log_dir=args.log_dir)
             else:
                 log_writer = None
+                
+            if args.distributed:
+                data_loader_train.sampler.set_epoch(epoch)
+            if log_writer is not None:
+                log_writer.set_step(epoch)
+            
+            n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)            
             
             total_batch_size = args.batch_size * num_tasks
             print("LR = %.8f" % args.lr)
             print("Batch size = %d" % total_batch_size)
             print("Number of training steps = %d" % num_training_steps_per_inner_epoch)
             print("Number of training examples per epoch = %d" % (total_batch_size * num_training_steps_per_inner_epoch))
-                        
-            print(f"Start training for {args.E_epoch} inner epochs")
-            start_time = time.time()
+                    
             for inner_epoch in range(args.E_epoch):
-                if args.distributed:
-                    data_loader_train.sampler.set_epoch(epoch)
-                if log_writer is not None:
-                    # print('log_writer.step: ', log_writer.step)
-                    # print('epoch + inner_epoch: ',  epoch + inner_epoch)
-                    log_writer.set_step(epoch + inner_epoch)
-                
                 # ============ training one epoch of BEiT  ============
                 train_stats = train_one_epoch(args, model, d_vae, data_loader_train,
                                               optimizer, device, epoch, 
@@ -309,12 +318,9 @@ def main(args, model):
                               encoding="utf-8") as f:
                         f.write(json.dumps(log_stats) + "\n")
             
-            total_time = time.time() - start_time
-            total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-            print('Training time {}'.format(total_time_str))
-            
             # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory
             model.to('cpu')
+            model_without_ddp.to('cpu')
         
         # average model
         average_model(args, model_avg, model_all)
@@ -334,9 +340,13 @@ def main(args, model):
         if args.global_step_per_client[proxy_single_client] >= args.t_total[proxy_single_client]:
             break
     
+    total_time = time.time() - start_time
+    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
+    
     print("================End pre-training! ================ ")
-    
-    
+    print('pretraining time {}'.format(total_time_str))
+
+
 if __name__ == '__main__':
     opts = get_args()
     
@@ -345,7 +355,7 @@ if __name__ == '__main__':
     
     # initialize model
     model = get_model(opts)
-    
+            
     print_options(opts, model)
     
     # set train val related paramteres

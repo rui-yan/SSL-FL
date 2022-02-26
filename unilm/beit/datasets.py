@@ -36,7 +36,7 @@ RETINA_STD = (0.0342, 0.0535, 0.0484)
 COVIDX_MEAN = (0.5518, 0.5518, 0.5518)
 COVIDX_STD = (0.2051, 0.2051, 0.2051)
 
-class DataAugmentationForBEiT(object):
+class DataAugmentationForPretrain(object):
     def __init__(self, args):
         
         if args.data_set == 'CIFAR10':
@@ -53,43 +53,74 @@ class DataAugmentationForBEiT(object):
         else:
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
-        if args.data_set == 'CIFAR10':
+        if args.model_name == 'beit':
+            # common_transform
+            if args.data_set == 'CIFAR10':
+                self.common_transform = transforms.Compose([
+                    transforms.ColorJitter(0.4, 0.4, 0.4),
+                    transforms.RandomHorizontalFlip(p=0.5),
+                    RandomResizedCropAndInterpolationWithTwoPic(
+                        size=args.input_size, second_size=args.second_input_size,
+                        interpolation=args.train_interpolation,
+                        second_interpolation=args.second_interpolation,
+                    ),
+                ])
+            elif args.data_set == 'Retina':
+                '''https://github.com/xmengli/self_supervised/blob/master/main.py'''
+                self.common_transform = transforms.Compose([
+                    transforms.RandomGrayscale(p=0.2),
+                    transforms.ColorJitter(0.4, 0.4, 0.4),
+                    transforms.RandomHorizontalFlip(p=0.5),
+                    # transforms.RandomRotation(degrees=10),
+                    RandomResizedCropAndInterpolationWithTwoPic(
+                        size=args.input_size, second_size=args.second_input_size,
+                        scale=(0.2, 1.0),
+                        interpolation=args.train_interpolation,
+                        second_interpolation=args.second_interpolation,
+                    ),
+                ])
+            elif args.data_set == 'COVIDx':
+                self.common_transform = transforms.Compose([
+                    transforms.CenterCrop(args.input_size),
+                    transforms.ColorJitter(0.4, 0.4, 0.4),
+                    transforms.RandomHorizontalFlip(p=0.5),
+                    # transforms.RandomRotation(10),
+                    RandomResizedCropAndInterpolationWithTwoPic(
+                        size=args.input_size, second_size=args.second_input_size,
+                        scale=(0.2, 1.0),
+                        interpolation=args.train_interpolation,
+                        second_interpolation=args.second_interpolation,
+                    ),
+                ])
+            
+            # visual_token_transform
+            if args.discrete_vae_type == "dall-e":
+                self.visual_token_transform = transforms.Compose([
+                    transforms.ToTensor(),
+                    map_pixels,
+                ])
+            elif args.discrete_vae_type == "customized":
+                self.visual_token_transform = transforms.Compose([
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=torch.tensor(mean),
+                        std=torch.tensor(std),
+                    ),
+                ])
+            else:
+                raise NotImplementedError()
+                
+            self.masked_position_generator = MaskingGenerator(
+                args.window_size, num_masking_patches=args.num_mask_patches,
+                max_num_patches=args.max_mask_patches_per_block,
+                min_num_patches=args.min_mask_patches_per_block,
+            )
+        
+        elif args.model_name == 'mae':
+            # common_transform
             self.common_transform = transforms.Compose([
-                transforms.ColorJitter(0.4, 0.4, 0.4),
-                transforms.RandomHorizontalFlip(p=0.5),
-                RandomResizedCropAndInterpolationWithTwoPic(
-                    size=args.input_size, second_size=args.second_input_size,
-                    interpolation=args.train_interpolation,
-                    second_interpolation=args.second_interpolation,
-                ),
-            ])
-        elif args.data_set == 'Retina':
-            '''https://github.com/xmengli/self_supervised/blob/master/main.py'''
-            self.common_transform = transforms.Compose([
-                transforms.RandomGrayscale(p=0.2),
-                transforms.ColorJitter(0.4, 0.4, 0.4),
-                transforms.RandomHorizontalFlip(p=0.5),
-                # transforms.RandomRotation(degrees=10),
-                RandomResizedCropAndInterpolationWithTwoPic(
-                    size=args.input_size, second_size=args.second_input_size,
-                    scale=(0.2, 1.0),
-                    interpolation=args.train_interpolation,
-                    second_interpolation=args.second_interpolation,
-                ),
-            ])
-        elif args.data_set == 'COVIDx':
-            self.common_transform = transforms.Compose([
-                transforms.CenterCrop(args.input_size),
-                transforms.ColorJitter(0.4, 0.4, 0.4),
-                transforms.RandomHorizontalFlip(p=0.5),
-                # transforms.RandomRotation(10),
-                RandomResizedCropAndInterpolationWithTwoPic(
-                    size=args.input_size, second_size=args.second_input_size,
-                    scale=(0.2, 1.0),
-                    interpolation=args.train_interpolation,
-                    second_interpolation=args.second_interpolation,
-                ),
-            ])
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+                    transforms.RandomHorizontalFlip(p=0.5)])
         
         self.patch_transform = transforms.Compose([
             transforms.ToTensor(),
@@ -97,43 +128,34 @@ class DataAugmentationForBEiT(object):
                 mean=torch.tensor(mean),
                 std=torch.tensor(std))
         ])
-
-
-        if args.discrete_vae_type == "dall-e":
-            self.visual_token_transform = transforms.Compose([
-                transforms.ToTensor(),
-                map_pixels,
-            ])
-        elif args.discrete_vae_type == "customized":
-            self.visual_token_transform = transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=torch.tensor(mean),
-                    std=torch.tensor(std),
-                ),
-            ])
-        else:
-            raise NotImplementedError()
-
-        self.masked_position_generator = MaskingGenerator(
-            args.window_size, num_masking_patches=args.num_mask_patches,
-            max_num_patches=args.max_mask_patches_per_block,
-            min_num_patches=args.min_mask_patches_per_block,
-        )
+        
+        self.args = args
+        
     
     def __call__(self, image):
-        for_patches, for_visual_tokens = self.common_transform(image)
-        return \
-            self.patch_transform(for_patches), self.visual_token_transform(for_visual_tokens), \
-            self.masked_position_generator()
+        if self.args.model_name == 'beit':
+            for_patches, for_visual_tokens = self.common_transform(image)
+            return \
+                self.patch_transform(for_patches), self.visual_token_transform(for_visual_tokens), \
+                self.masked_position_generator()
+        elif self.args.model_name == 'mae':
+            for_patches = self.common_transform(image)
+            return self.patch_transform(for_patches)
     
     def __repr__(self):
-        repr = "(DataAugmentationForBEiT,\n"
-        repr += "  common_transform = %s,\n" % str(self.common_transform)
-        repr += "  patch_transform = %s,\n" % str(self.patch_transform)
-        repr += "  visual_tokens_transform = %s,\n" % str(self.visual_token_transform)
-        repr += "  Masked position generator = %s,\n" % str(self.masked_position_generator)
-        repr += ")"
+        if self.args.model_name == 'beit':
+            repr = "(DataAugmentationForBEiT,\n"
+            repr += "  common_transform = %s,\n" % str(self.common_transform)
+            repr += "  patch_transform = %s,\n" % str(self.patch_transform)
+            repr += "  visual_tokens_transform = %s,\n" % str(self.visual_token_transform)
+            repr += "  Masked position generator = %s,\n" % str(self.masked_position_generator)
+            repr += ")"
+            
+        elif self.args.model_name == 'mae':
+            repr = "(DataAugmentationFoMAE,\n"
+            repr += "  common_transform = %s,\n" % str(self.common_transform)
+            repr += "  patch_transform = %s,\n" % str(self.patch_transform)
+        
         return repr
 
     
