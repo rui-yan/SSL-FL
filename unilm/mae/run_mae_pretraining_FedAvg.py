@@ -41,13 +41,16 @@ def get_args():
     parser = argparse.ArgumentParser('MAE pre-training', add_help=False)
     parser.add_argument('--batch_size', default=64, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
+    parser.add_argument('--save_ckpt_freq', default=20, type=int)
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
     # Model parameters
     parser.add_argument('--model', default='mae_vit_large_patch16', type=str, metavar='MODEL',
                         help='Name of model to train')
-
+    
+    parser.add_argument('--model_name', default='mae', type=str)
+    
     parser.add_argument('--input_size', default=224, type=int,
                         help='images input size')
 
@@ -57,7 +60,7 @@ def get_args():
     parser.add_argument('--norm_pix_loss', action='store_true',
                         help='Use (per-patch) normalized pixels as targets for computing loss')
     parser.set_defaults(norm_pix_loss=False)
-
+    
     # Optimizer parameters
     parser.add_argument('--weight_decay', type=float, default=0.05,
                         help='weight decay (default: 0.05)')
@@ -100,6 +103,7 @@ def get_args():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--local_rank', default=-1, type=int)
+    parser.add_argument('--sync_bn', default=False, action='store_true')
     parser.add_argument('--dist_on_itp', action='store_true')
     parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
@@ -139,6 +143,8 @@ def main(args, model):
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, loss_scaler_all = Partial_Client_Selection(args, model)
     model_avg = deepcopy(model).cpu()
+    
+    global_rank = misc.get_rank()
     
     if global_rank == 0 and args.log_dir is not None:
         os.makedirs(args.log_dir, exist_ok=True)
@@ -181,8 +187,8 @@ def main(args, model):
             # ---- get dataset for each client for pretraining
             dataset_train = DatasetFLPretrain(args)
             
-            num_tasks = utils.get_world_size()
-            global_rank = utils.get_rank()
+            num_tasks = misc.get_world_size()
+            global_rank = misc.get_rank()
             sampler_rank = global_rank
             num_training_steps_per_inner_epoch = len(dataset_train) // args.batch_size // num_tasks
             
@@ -235,6 +241,8 @@ def main(args, model):
                 train_stats = train_one_epoch(
                     model, data_loader_train,
                     optimizer, device, epoch, loss_scaler,
+                    cur_single_client,
+                    proxy_single_client=proxy_single_client,
                     log_writer=log_writer,
                     args=args
                 )
@@ -283,7 +291,7 @@ if __name__ == '__main__':
         Path(opts.output_dir).mkdir(parents=True, exist_ok=True)
     
     # initialize model
-    model = models_mae.__dict__[args.model](norm_pix_loss=args.norm_pix_loss)
+    model = models_mae.__dict__[opts.model](norm_pix_loss=opts.norm_pix_loss)
     print_options(opts, model)
     
     # set train val related paramteres
@@ -294,15 +302,15 @@ if __name__ == '__main__':
     main(opts, model)
     
     # Show final performance
-    message = '\n \n ==========Start showing final performance ============ \n'
-    message += 'Final union mlm accuracy is: %2.5f with std: %2.5f \n' %  \
-                   (np.asarray(list(opts.current_mlm_acc.values())).mean(), 
-                    np.asarray(list(opts.current_mlm_acc.values())).std())
-    message += "================ End ================ \n"
+#     message = '\n \n ==========Start showing final performance ============ \n'
+#     message += 'Final union loss is: %2.5f with std: %2.5f \n' %  \
+#                    (np.asarray(list(opts.current_loss.values())).mean(), 
+#                     np.asarray(list(opts.current_loss.values())).std())
+#     # message += "================ End ================ \n"
     
-    with open(opts.file_name, 'a+') as args_file:
-        args_file.write(message)
-        args_file.write('\n')
+#     with open(opts.file_name, 'a+') as args_file:
+#         args_file.write(message)
+#         args_file.write('\n')
     
-    print(message)
+#     print(message)
     

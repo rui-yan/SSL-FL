@@ -19,6 +19,8 @@ from timm.data.mixup import Mixup
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 from optim_factory import create_optimizer, get_parameter_groups, LayerDecayValueAssigner, add_weight_decay
 
+from timm.models.layers import trunc_normal_
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
     def __init__(self):
@@ -241,7 +243,11 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         
         # load pre-trained model
         if args.model_name == 'beit':
-            misc.load_state_dict(model, checkpoint_model, prefix=args.model_prefix)
+            msg = model.load_state_dict(checkpoint_model, strict=False)
+            # misc.load_state_dict(model, checkpoint_model, prefix=args.model_prefix)
+            # manually initialize fc layer
+            trunc_normal_(model.head.weight, std=2e-5)
+            
         elif args.model_name == 'mae':
             msg = model.load_state_dict(checkpoint_model, strict=False)
             print(msg)
@@ -273,8 +279,8 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
                 total_batch_size = args.batch_size * args.update_freq * num_tasks
         elif args.model_name == 'mae':
             total_batch_size = args.batch_size * args.accum_iter * num_tasks
-                if args.lr is None:  # only base_lr is specified
-                    args.lr = args.blr * total_batch_size / 256
+            if args.lr is None:  # only base_lr is specified
+                args.lr = args.blr * total_batch_size / 256
         
         num_training_steps_per_inner_epoch = args.clients_with_len[proxy_single_client] // total_batch_size
             
@@ -375,7 +381,7 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         loss_scaler_all[proxy_single_client] = NativeScaler()
 
         # resume model if specified
-        misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
+        # misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
 
         # get the total decay steps first
         args.t_total[proxy_single_client] = num_training_steps_per_inner_epoch * args.E_epoch * args.max_communication_rounds

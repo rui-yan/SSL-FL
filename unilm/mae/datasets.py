@@ -19,9 +19,9 @@ from timm.data.constants import \
 from transforms import RandomResizedCropAndInterpolationWithTwoPic
 from timm.data import create_transform
 
-from dall_e.utils import map_pixels
-from masking_generator import MaskingGenerator
-from dataset_folder import ImageFolder
+# from dall_e.utils import map_pixels
+# from masking_generator import MaskingGenerator
+# from dataset_folder import ImageFolder
 from PIL import Image
 from skimage.transform import resize
 
@@ -38,6 +38,8 @@ COVIDX_STD = (0.2051, 0.2051, 0.2051)
 
 class DataAugmentationForPretrain(object):
     def __init__(self, args):
+        
+        self.args = args
         
         if args.data_set == 'CIFAR10':
             mean = CIFAR10_DEFAULT_MEAN
@@ -125,24 +127,24 @@ class DataAugmentationForPretrain(object):
         
     
     def __call__(self, image):
-        if args.model_name == 'beit':
+        if self.args.model_name == 'beit':
             for_patches, for_visual_tokens = self.common_transform(image)
             return \
                 self.patch_transform(for_patches), self.visual_token_transform(for_visual_tokens), \
                 self.masked_position_generator()
-        elif args.model_name == 'mae':
+        elif self.args.model_name == 'mae':
             for_patches = self.common_transform(image)
             return self.patch_transform(for_patches)
     
     def __repr__(self):
-        if args.model_name == 'beit':
+        if self.args.model_name == 'beit':
             repr = "(DataAugmentationForBEiT,\n"
             repr += "  common_transform = %s,\n" % str(self.common_transform)
             repr += "  patch_transform = %s,\n" % str(self.patch_transform)
             repr += "  visual_tokens_transform = %s,\n" % str(self.visual_token_transform)
             repr += "  Masked position generator = %s,\n" % str(self.masked_position_generator)
             repr += ")"
-        elif args.model_name == 'mae':
+        elif self.args.model_name == 'mae':
             repr = "(DataAugmentationFoMAE,\n"
             repr += "  common_transform = %s,\n" % str(self.common_transform)
             repr += "  patch_transform = %s,\n" % str(self.patch_transform)

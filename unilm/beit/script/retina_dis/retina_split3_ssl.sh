@@ -20,21 +20,21 @@ BATCH_SIZE=64
 
 OUTPUT_PATH="/data/yan/SSL-FL/fedavg_model_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_lr${LR}_min_lr${MIN_LR}_bs${BATCH_SIZE}_dis"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_beit_pretraining_FedAvg_distributed.py \
-        --data_path ${DATA_PATH} \
-        --data_set ${DATASET} \
-        --output_dir ${OUTPUT_PATH} \
-        --lr ${LR} \
-        --batch_size ${BATCH_SIZE} \
-        --save_ckpt_freq 50 \
-        --max_communication_rounds ${EPOCHS} \
-        --split_type ${SPLIT_TYPE} \
-        --num_mask_patches 75 \
-        --model beit_base_patch16_224_8k_vocab \
-        --discrete_vae_weight_path /data/yan/SSL-FL/tokenizer_weight \
-        --warmup_epochs 10 --sync_bn \
-        --clip_grad 3.0 --drop_path 0.1 --layer_scale_init_value 0.1 \
-        --n_clients ${N_CLIENTS} --E_epoch 1  --num_local_clients -1 \
+# CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_beit_pretraining_FedAvg_distributed.py \
+#         --data_path ${DATA_PATH} \
+#         --data_set ${DATASET} \
+#         --output_dir ${OUTPUT_PATH} \
+#         --lr ${LR} \
+#         --batch_size ${BATCH_SIZE} \
+#         --save_ckpt_freq 50 \
+#         --max_communication_rounds ${EPOCHS} \
+#         --split_type ${SPLIT_TYPE} \
+#         --num_mask_patches 75 \
+#         --model beit_base_patch16_224_8k_vocab \
+#         --discrete_vae_weight_path /data/yan/SSL-FL/tokenizer_weight \
+#         --warmup_epochs 10 --sync_bn \
+#         --clip_grad 3.0 --drop_path 0.1 --layer_scale_init_value 0.1 \
+#         --n_clients ${N_CLIENTS} --E_epoch 1  --num_local_clients -1 \
 
 # ------------------ finetune ----------------- #
 CKPT_PATH="${OUTPUT_PATH}/checkpoint-999.pth"

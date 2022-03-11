@@ -5,13 +5,13 @@ MODEL_NAME='mae'
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
 DATASET='Retina'
-SPLIT_TYPE='split_1'
+SPLIT_TYPE='split_3'
 N_CLASSES=2
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
 
 # ------------------ finetune ----------------- #
-# CKPT_PATH='/data/yan/SSL-FL/fedavg_mae_ckpt_5/imnet_pretrained_beit_base/mae_pretrain_vit_base.pth'
+CKPT_PATH='/data/yan/SSL-FL/fedavg_mae_ckpt_5/imnet_pretrained_beit_base/mae_pretrain_vit_base.pth'
 FT_EPOCHS=100
 FT_LR='3e-3'
 FT_BATCH_SIZE=64

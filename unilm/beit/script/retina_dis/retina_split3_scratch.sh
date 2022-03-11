@@ -9,7 +9,7 @@ DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
 
 # ------------------ finetune ----------------- #
-FT_EPOCHS=1000
+FT_EPOCHS=2000
 FT_LR='3e-3'
 FT_BATCH_SIZE=64
 

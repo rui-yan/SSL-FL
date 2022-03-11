@@ -1,6 +1,8 @@
 #!/bin/bash
 
-cd /home/yan/SSL-FL/unilm/beit/
+MODEL_NAME='beit'
+
+cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
 DATASET='Retina'
 SPLIT_TYPE='split_1'
@@ -12,7 +14,7 @@ N_CLIENTS=5
 FT_EPOCHS=100
 FT_LR='3e-3'
 FT_BATCH_SIZE=64
-OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_model_ckpt_${N_CLIENTS}/imnet_pretrained_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis"
+OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_{$MODEL_NAME}_ckpt_${N_CLIENTS}/imnet_pretrained_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_class_finetuning_FedAvg_distributed.py \
      --data_path ${DATA_PATH} \
@@ -26,8 +28,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launc
      --batch_size ${FT_BATCH_SIZE} --update_freq 1 --split_type ${SPLIT_TYPE} \
      --warmup_epochs 5 --layer_decay 0.65 --drop_path 0.2 \
      --weight_decay 0.05 --layer_scale_init_value 0.1 --clip_grad 3.0 \
-     --n_clients ${N_CLIENTS} --E_epoch 1 --max_communication_rounds ${FT_EPOCHS} --num_local_clients -1 
-
+     --n_clients ${N_CLIENTS} --E_epoch 1 --max_communication_rounds ${FT_EPOCHS} --num_local_clients -1
+     
 # # ------------------ evaluate ----------------- #
 # CKPT_PATH="${OUTPUT_PATH_FT}/checkpoint-best.pth"
 # CUDA_VISIBLE_DEVICES=0 python run_class_finetuning_FedAvg_distributed.py \

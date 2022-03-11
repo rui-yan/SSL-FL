@@ -24,7 +24,7 @@ from pathlib import Path
 import torch
 import torch.distributed as dist
 from torch._six import inf
-from modeling_discrete_vae import Dalle_VAE, DiscreteVAE
+# from modeling_discrete_vae import Dalle_VAE, DiscreteVAE
 
 from tensorboardX import SummaryWriter
 
@@ -472,39 +472,50 @@ def load_model(args, model_without_ddp, optimizer, loss_scaler, model_ema=None):
             print("With optim & sched!")
 
 
-def create_d_vae(weight_path, d_vae_type, image_size, device):
-    if d_vae_type == "dall-e":
-        return get_dalle_vae(weight_path, image_size, device)
-    elif d_vae_type == "customized":
-        return get_d_vae(weight_path, image_size, device)
+def all_reduce_mean(x):
+    world_size = get_world_size()
+    if world_size > 1:
+        x_reduce = torch.tensor(x).cuda()
+        dist.all_reduce(x_reduce)
+        x_reduce /= world_size
+        return x_reduce.item()
     else:
-        raise NotImplementedError()
+        return x
+    
+    
+# def create_d_vae(weight_path, d_vae_type, image_size, device):
+#     if d_vae_type == "dall-e":
+#         return get_dalle_vae(weight_path, image_size, device)
+#     elif d_vae_type == "customized":
+#         return get_d_vae(weight_path, image_size, device)
+#     else:
+#         raise NotImplementedError()
 
 
-def get_dalle_vae(weight_path, image_size, device):
-    vae = Dalle_VAE(image_size)
-    vae.load_model(model_dir=weight_path, device=device)
-    return vae
+# def get_dalle_vae(weight_path, image_size, device):
+#     vae = Dalle_VAE(image_size)
+#     vae.load_model(model_dir=weight_path, device=device)
+#     return vae
 
 
-def get_d_vae(weight_path, image_size, device):
-    NUM_TOKENS = 8192
-    NUM_LAYERS = 3
-    EMB_DIM = 512
-    HID_DIM = 256
+# def get_d_vae(weight_path, image_size, device):
+#     NUM_TOKENS = 8192
+#     NUM_LAYERS = 3
+#     EMB_DIM = 512
+#     HID_DIM = 256
 
-    state_dict = torch.load(os.path.join(weight_path, "pytorch_model.bin"), map_location="cpu")["weights"]
+#     state_dict = torch.load(os.path.join(weight_path, "pytorch_model.bin"), map_location="cpu")["weights"]
 
-    model = DiscreteVAE(
-        image_size=image_size,
-        num_layers=NUM_LAYERS,
-        num_tokens=NUM_TOKENS,
-        codebook_dim=EMB_DIM,
-        hidden_dim=HID_DIM,
-    ).to(device)
+#     model = DiscreteVAE(
+#         image_size=image_size,
+#         num_layers=NUM_LAYERS,
+#         num_tokens=NUM_TOKENS,
+#         codebook_dim=EMB_DIM,
+#         hidden_dim=HID_DIM,
+#     ).to(device)
 
-    model.load_state_dict(state_dict)
-    return model
+#     model.load_state_dict(state_dict)
+#     return model
 
 
 def create_ds_config(args):
@@ -536,4 +547,4 @@ def create_ds_config(args):
             }
         }
 
-        writer.write(json.dumps(ds_config, indent=2)
+        writer.write(json.dumps(ds_config, indent=2))

@@ -168,8 +168,11 @@ def train_one_epoch(args, model: torch.nn.Module, criterion: torch.nn.Module,
             # log_writer.update(grad_norm=grad_norm, head=proxy_single_client + "/opt")
             
             log_writer.set_step()
-            
+        
     args.current_acc[cur_single_client] = metric_logger.get_class_acc()
+    
+    print('best_acc:', args.best_acc[cur_single_client])
+    print('current_acc:', args.current_acc[cur_single_client])
     if args.best_acc[cur_single_client] < args.current_acc[cur_single_client]:
         args.best_acc[cur_single_client] = args.current_acc[cur_single_client]
     

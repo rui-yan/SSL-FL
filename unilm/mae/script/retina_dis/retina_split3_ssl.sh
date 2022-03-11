@@ -5,7 +5,7 @@ MODEL_NAME='mae'
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
 DATASET='Retina'
-SPLIT_TYPE='split_1'
+SPLIT_TYPE='split_3'
 N_CLASSES=2
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
@@ -21,7 +21,7 @@ BATCH_SIZE=64
 
 # OUTPUT_PATH="/data/yan/SSL-FL/fedavg_model_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_lr${LR}_bs${BATCH_SIZE}_dis"
 
-OUTPUT_PATH="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_blr${BLR}_bs${BATCH_SIZE}_dis_2"
+OUTPUT_PATH="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_blr${BLR}_bs${BATCH_SIZE}_dis"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_mae_pretraining_FedAvg.py \
         --data_path ${DATA_PATH} \

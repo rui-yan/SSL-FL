@@ -145,7 +145,7 @@ def get_args():
                         help="Total communication rounds")
     parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")
-    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "central"], 
+    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "split_4", "central"], 
                         default="central", help="Which data partitions to use")
     
     return parser.parse_args()
@@ -267,7 +267,7 @@ def main(args, model):
                 batch_size=args.batch_size,
                 num_workers=args.num_workers,
                 pin_memory=args.pin_mem,
-                drop_last=True,
+                # drop_last=True,
                 )
             # print('train_data_len; ', len(data_loader_train))
             
@@ -385,14 +385,14 @@ if __name__ == '__main__':
     main(opts, model)
     
     # Show final performance
-    message = '\n \n ==========Start showing final performance ============ \n'
-    message += 'Final union mlm accuracy is: %2.5f with std: %2.5f \n' %  \
-                   (np.asarray(list(opts.current_mlm_acc.values())).mean(), 
-                    np.asarray(list(opts.current_mlm_acc.values())).std())
-    message += "================ End ================ \n"
+#     message = '\n \n ==========Start showing final performance ============ \n'
+#     message += 'Final union mlm accuracy is: %2.5f with std: %2.5f \n' %  \
+#                    (np.asarray(list(opts.current_mlm_acc.values())).mean(), 
+#                     np.asarray(list(opts.current_mlm_acc.values())).std())
+#     message += "================ End ================ \n"
     
-    with open(opts.file_name, 'a+') as args_file:
-        args_file.write(message)
-        args_file.write('\n')
+#     with open(opts.file_name, 'a+') as args_file:
+#         args_file.write(message)
+#         args_file.write('\n')
     
-    print(message)
+    # print(message)

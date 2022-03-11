@@ -5,17 +5,17 @@ MODEL_NAME='mae'
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
 DATASET='Retina'
-SPLIT_TYPE='split_1'
+SPLIT_TYPE='split_2'
 N_CLASSES=2
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
 
 # ------------------ finetune ----------------- #
-# CKPT_PATH='/data/yan/SSL-FL/fedavg_mae_ckpt_5/imnet_pretrained_beit_base/mae_pretrain_vit_base.pth'
+CKPT_PATH='/data/yan/SSL-FL/fedavg_mae_ckpt_5/imnet_pretrained_beit_base/mae_pretrain_vit_base.pth'
 FT_EPOCHS=100
 FT_LR='3e-3'
 FT_BATCH_SIZE=64
-OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/imnet_pretrained_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis_2"
+OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/imnet_pretrained_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_class_finetuning_FedAvg.py \
      --data_path ${DATA_PATH} \

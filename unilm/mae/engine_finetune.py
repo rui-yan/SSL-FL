@@ -25,6 +25,7 @@ import util.lr_sched as lr_sched
 def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
                     device: torch.device, epoch: int, loss_scaler, max_norm: float = 0,
+                    proxy_single_client=None,
                     mixup_fn: Optional[Mixup] = None, log_writer=None,
                     args=None):
     model.train(True)
@@ -41,7 +42,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         print('log_dir: {}'.format(log_writer.log_dir))
 
     for data_iter_step, (samples, targets) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
-
+        
+        args.global_step_per_client[proxy_single_client] += 1
+        
         # we use a per iteration (instead of per epoch) lr scheduler
         if data_iter_step % accum_iter == 0:
             lr_sched.adjust_learning_rate(optimizer, data_iter_step / len(data_loader) + epoch, args)
@@ -92,6 +95,11 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger)
+    
+    # args.current_acc[cur_single_client] = metric_logger.get_class_acc()
+    # if args.best_acc[cur_single_client] < args.current_acc[cur_single_client]:
+    #     args.best_acc[cur_single_client] = args.current_acc[cur_single_client]
+    
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
 
 

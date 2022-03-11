@@ -34,23 +34,32 @@ import models_vit
 
 from engine_finetune import train_one_epoch, evaluate
 
+from copy import deepcopy
+from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
+from FedAvg_utils.data_utils import DatasetFLFinetune, create_dataset_and_evalmetrix
+from FedAvg_utils.start_config import print_options
 
 def get_args():
     parser = argparse.ArgumentParser('MAE fine-tuning for image classification', add_help=False)
     parser.add_argument('--batch_size', default=64, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * accum_iter * # gpus')
+    parser.add_argument('--save_ckpt_freq', default=20, type=int)
     parser.add_argument('--accum_iter', default=1, type=int,
                         help='Accumulate gradient iterations (for increasing the effective batch size under memory constraints)')
 
     # Model parameters
     parser.add_argument('--model', default='vit_large_patch16', type=str, metavar='MODEL',
                         help='Name of model to train')
-
+    
+    parser.add_argument('--model_name', default='mae', type=str)
+    
     parser.add_argument('--input_size', default=224, type=int,
                         help='images input size')
 
     parser.add_argument('--drop_path', type=float, default=0.1, metavar='PCT',
                         help='Drop path rate (default: 0.1)')
+    
+    parser.add_argument('--disable_eval_during_finetuning', action='store_true', default=False)
 
     # Optimizer parameters
     parser.add_argument('--clip_grad', type=float, default=None, metavar='NORM',
@@ -111,7 +120,10 @@ def get_args():
     parser.add_argument('--cls_token', action='store_false', dest='global_pool',
                         help='Use class token instead of global pool for classification')
 
-    # Dataset parameters
+    # Dataset parameters\
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDx', 'CIFAR100', 
+                                                                'IMNET', 'Retina', 'image_folder'],
+                        type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
     parser.add_argument('--nb_classes', default=1000, type=int,
@@ -143,6 +155,7 @@ def get_args():
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--local_rank', default=-1, type=int)
+    parser.add_argument('--sync_bn', default=False, action='store_true')
     parser.add_argument('--dist_on_itp', action='store_true')
     parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
@@ -160,7 +173,7 @@ def get_args():
     return parser.parse_args()
 
 
-def main(args):
+def main(args, model):
     misc.init_distributed_mode(args)
 
     print('job dir: {}'.format(os.path.dirname(os.path.realpath(__file__))))
@@ -180,16 +193,19 @@ def main(args):
         dataset_val = None
     else:
         dataset_val = DatasetFLFinetune(args=args, phase='test')
-        
+    
+    num_tasks = misc.get_world_size()
+    global_rank = misc.get_rank()
+    
     if args.dist_eval:
-            if len(dataset_val) % num_tasks != 0:
-                print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
-                      'This will slightly alter validation results as extra duplicate entries are added to achieve '
-                      'equal num of samples per-process.')
+        if len(dataset_val) % num_tasks != 0:
+            print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
+                  'This will slightly alter validation results as extra duplicate entries are added to achieve '
+                  'equal num of samples per-process.')
             sampler_val = torch.utils.data.DistributedSampler(
                 dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=True)  # shuffle=True to reduce monitor bias
-        else:
-            sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+    else:
+        sampler_val = torch.utils.data.SequentialSampler(dataset_val)
     
     if dataset_val is not None:
         data_loader_val = torch.utils.data.DataLoader(
@@ -250,8 +266,8 @@ def main(args):
             # ---- get dataset for each client for pretraining finetuning 
             dataset_train = DatasetFLFinetune(args=args, phase='train')
             
-            num_tasks = utils.get_world_size()
-            global_rank = utils.get_rank()
+            num_tasks = misc.get_world_size()
+            global_rank = misc.get_rank()
             
             print(f'=========client: {proxy_single_client} ==============')
             if args.distributed:
@@ -277,7 +293,7 @@ def main(args):
             optimizer = optimizer_all[proxy_single_client]
             criterion = criterion_all[proxy_single_client]
             loss_scaler = loss_scaler_all[proxy_single_client]
-            mixup_fn = mixupfn_all[proxy_single_client]
+            mixup_fn = mixup_fn_all[proxy_single_client]
             
             if args.distributed:
                 model_without_ddp = model.module
@@ -301,7 +317,6 @@ def main(args):
             num_training_steps_per_inner_epoch = len(dataset_train) // total_batch_size
             print("LR = %.8f" % args.lr)
             print("Batch size = %d" % total_batch_size)
-            print("Update frequent = %d" % args.update_freq)
             print("Number of training examples = %d" % len(dataset_train))
             print("Number of training training per epoch = %d" % num_training_steps_per_inner_epoch)
             
@@ -326,7 +341,8 @@ def main(args):
                 train_stats = train_one_epoch(
                         model, criterion, data_loader_train,
                         optimizer, device, epoch, loss_scaler,
-                        args.clip_grad, mixup_fn,
+                        args.clip_grad, proxy_single_client,
+                        mixup_fn,
                         log_writer=log_writer,
                         args=args
                         )
@@ -338,7 +354,7 @@ def main(args):
                              'inner_epoch': inner_epoch,
                              'n_parameters': n_parameters}
                 
-                if args.output_dir and utils.is_main_process():
+                if args.output_dir and misc.is_main_process():
                     if log_writer is not None:
                         log_writer.flush()
                     with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
@@ -350,9 +366,9 @@ def main(args):
         
         # save the global model
         # TO CHECK: global model is the same for each client?
-        if args.output_dir and args.save_ckpt:
+        if args.output_dir:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.max_communication_rounds:
-                utils.save_model(
+                misc.save_model(
                     args=args, model=model_avg, model_without_ddp=model_avg,
                     optimizer=optimizer, loss_scaler=loss_scaler, epoch=epoch)
         
@@ -364,8 +380,8 @@ def main(args):
             
             if max_accuracy < test_stats["acc1"]:
                 max_accuracy = test_stats["acc1"]
-                if args.output_dir and args.save_ckpt:
-                    utils.save_model(
+                if args.output_dir:
+                    misc.save_model(
                         args=args, model=model_avg, 
                         model_without_ddp=model_without_ddp, optimizer=optimizer,
                         loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
@@ -380,7 +396,7 @@ def main(args):
                          'epoch': epoch,
                          'n_parameters': n_parameters}
             
-        if args.output_dir and utils.is_main_process():
+        if args.output_dir and misc.is_main_process():
                 if log_writer is not None:
                     log_writer.flush()
                 with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:

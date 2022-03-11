@@ -139,6 +139,8 @@ def get_args():
     # * Finetuning params
     parser.add_argument('--finetune', default='',
                         help='finetune from checkpoint')
+    parser.add_argument('--global_pool', action='store_true')
+    parser.set_defaults(global_pool=True)
     parser.add_argument('--model_key', default='model|module', type=str)
     parser.add_argument('--model_prefix', default='', type=str)
     parser.add_argument('--init_scale', default=0.001, type=float)
@@ -203,7 +205,7 @@ def get_args():
                         help="Total communication rounds.")
     parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")
-    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "central"], 
+    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "split_4", "central"], 
                         default="central", help="Which data partitions to use")
     
     return parser.parse_args()
@@ -255,8 +257,19 @@ def main(args, model):
     else:
         dataset_val = DatasetFLBEiT(args=args, phase='test')
     
-    sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+    num_tasks = utils.get_world_size()
+    global_rank = utils.get_rank()
     
+    if args.dist_eval:
+        if len(dataset_val) % num_tasks != 0:
+            print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
+                  'This will slightly alter validation results as extra duplicate entries are added to achieve '
+                  'equal num of samples per-process.')
+            sampler_val = torch.utils.data.DistributedSampler(
+                dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=True)  # shuffle=True to reduce monitor bias
+    else:
+        sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+        
     if dataset_val is not None:
         data_loader_val = torch.utils.data.DataLoader(
             dataset_val, sampler=sampler_val,
@@ -487,19 +500,19 @@ def main(args, model):
             break
 
 if __name__ == '__main__':
-    opts = get_args()
-    if opts.output_dir:
-        Path(opts.output_dir).mkdir(parents=True, exist_ok=True)
+    args = get_args()
+    if args.output_dir:
+        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     
     # initialize model
-    model = get_model(opts)
+    model = get_model(args)
     
-    print_options(opts, model)
+    print_options(args, model)
     
     # set train val related paramteres
-    opts.best_acc = {}
-    opts.current_acc = {}
-    opts.current_test_acc = {}
+    args.best_acc = {}
+    args.current_acc = {}
+    args.current_test_acc = {}
 
     # run finetuning
-    main(opts, model)
+    main(args, model)
