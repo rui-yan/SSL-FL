@@ -114,21 +114,16 @@ class DataAugmentationForPretrain(object):
         
         elif args.model_name == 'mae':
             # common_transform
-            self.common_transform = transforms.Compose([
+            if args.aug == 'aug_2':
+                self.common_transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
                     transforms.RandomGrayscale(p=0.2),
                     transforms.ColorJitter(0.4, 0.4, 0.4),
                     transforms.RandomHorizontalFlip(p=0.5)])
-            
-            # self.common_transform = transforms.Compose([
-            #         transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-            #         transforms.RandomHorizontalFlip(p=0.5)])
-            
-        # elif args.model_name == 'mae':
-        #     # common_transform
-        #     self.common_transform = transforms.Compose([
-        #             transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-        #             transforms.RandomHorizontalFlip(p=0.5)])
+            elif args.aug == 'aug_1':
+                self.common_transform = transforms.Compose([
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+                    transforms.RandomHorizontalFlip(p=0.5)])
         
         self.patch_transform = transforms.Compose([
             transforms.ToTensor(),
