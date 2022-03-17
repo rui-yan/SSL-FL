@@ -267,7 +267,7 @@ def main(args, model):
                 batch_size=args.batch_size,
                 num_workers=args.num_workers,
                 pin_memory=args.pin_mem,
-                # drop_last=True,
+                drop_last=True,
                 )
             # print('train_data_len; ', len(data_loader_train))
             
@@ -340,7 +340,7 @@ def main(args, model):
                         f.write(json.dumps(log_stats) + "\n")
             
             # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory
-            # model.to('cpu')            
+            # model.to('cpu')
         
         # average model
         average_model(args, model_avg, model_all)
