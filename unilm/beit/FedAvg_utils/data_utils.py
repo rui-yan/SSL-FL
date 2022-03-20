@@ -204,7 +204,7 @@ def create_dataset_and_evalmetrix(args, mode='pretrain'):
         args.dis_cvs_files =[key for key in data_all['data'].keys() if 'train' in key]
         args.clients_with_len = {name: data_all['data'][name].shape[0] for name in args.dis_cvs_files}
     
-    elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
+    elif args.data_set == 'Retina' or args.data_set == 'COVIDfl':
         if args.split_type == 'central':
             args.dis_cvs_files = os.listdir(os.path.join(args.data_path, args.split_type))
         else:
