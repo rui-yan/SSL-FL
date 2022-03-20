@@ -48,8 +48,8 @@ class DataAugmentationForPretrain(object):
             std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
         elif args.data_set == 'Retina':
             mean, std = RETINA_MEAN, RETINA_STD
-        elif args.data_set == 'COVIDx':
-            mean, std = COVIDX_MEAN, COVIDX_STD
+        # elif args.data_set == 'COVIDx':
+        #     mean, std = COVIDX_MEAN, COVIDX_STD
         else:
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
@@ -79,7 +79,7 @@ class DataAugmentationForPretrain(object):
                         second_interpolation=args.second_interpolation,
                     ),
                 ])
-            elif args.data_set == 'COVIDx':
+            elif args.data_set == 'COVIDfl':
                 self.common_transform = transforms.Compose([
                     transforms.CenterCrop(args.input_size),
                     transforms.ColorJitter(0.4, 0.4, 0.4),
@@ -210,8 +210,8 @@ def build_transform(is_train, args):
         std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
     elif args.data_set == 'Retina':
         mean, std = RETINA_MEAN, RETINA_STD
-    elif args.data_set == 'COVIDx':
-        mean, std = COVIDX_MEAN, COVIDX_STD
+    # elif args.data_set == 'COVIDx':
+    #     mean, std = COVIDX_MEAN, COVIDX_STD
     else:
         mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
     
@@ -259,9 +259,9 @@ def build_transform(is_train, args):
                         mean=torch.tensor(mean),
                         std=torch.tensor(std))
                     ])
-            elif args.data_set == 'COVIDx':
-                transforms.CenterCrop(args.input_size),
+            elif args.data_set == 'COVIDfl':
                 transform = transforms.Compose([
+                    transforms.CenterCrop(args.input_size),
                     transforms.RandomRotation(degrees=10),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
