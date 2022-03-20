@@ -28,7 +28,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
             self.data = self.data_all['data'][args.single_client]
             self.labels = self.data_all['target'][args.single_client]
             
-        elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
+        elif args.data_set == 'Retina' or args.data_set == 'COVIDfl':
             
             if args.split_type == 'central':
                 cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
@@ -74,7 +74,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
             if self.args.data_set == 'Retina':
                 img = np.load(path)
                 img = resize(img, (256, 256))
-            else:
+            elif self.args.data_set == 'COVIDfl':
                 img = np.array(Image.open(path))
                 img = process_covidx_image(img, size=256)
             
@@ -93,7 +93,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
     def __len__(self):
         if self.args.data_set == 'CIFAR10':
             return len(self.data)
-        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDx':
+        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDfl':
             return len(self.img_paths)
 
 
@@ -118,7 +118,7 @@ class DatasetFLBEiT(data.Dataset):
                 self.labels = data_all['union_' + phase]['target']
         
         # Retina dataset
-        elif args.data_set == 'Retina' or args.data_set == 'COVIDx':
+        elif args.data_set == 'Retina' or args.data_set == 'COVIDfl':
             if self.phase == 'test':
                 args.single_client = os.path.join(args.data_path, 'test.csv')
             elif self.phase == 'val':
@@ -134,7 +134,7 @@ class DatasetFLBEiT(data.Dataset):
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
-        
+                
         self.transform = build_transform(is_train, args)
         self.args = args
     
@@ -165,7 +165,8 @@ class DatasetFLBEiT(data.Dataset):
             if self.args.data_set == 'Retina':
                 img = np.load(path)
                 img = resize(img, (256, 256))
-            else:
+                
+            elif self.args.data_set == 'COVIDfl':
                 img = np.array(Image.open(path))
                 img = process_covidx_image(img, size=256)
             
@@ -178,13 +179,13 @@ class DatasetFLBEiT(data.Dataset):
         if self.transform is not None:
             img = Image.fromarray(np.uint8(img))
             sample = self.transform(img)
-            
+                    
         return sample, target
 
     def __len__(self):
         if self.args.data_set == 'CIFAR10':
             return len(self.data)
-        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDx':
+        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDfl':
             return len(self.img_paths)
 
 

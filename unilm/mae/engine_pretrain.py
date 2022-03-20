@@ -22,6 +22,7 @@ def train_one_epoch(model: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
                     device: torch.device, epoch: int, loss_scaler,
                     cur_single_client,
+                    max_norm: float = 0,
                     proxy_single_client=None,
                     log_writer=None,
                     args=None):
@@ -35,7 +36,7 @@ def train_one_epoch(model: torch.nn.Module,
     accum_iter = args.accum_iter
 
     optimizer.zero_grad()
-
+    
     if log_writer is not None:
         print('log_dir: {}'.format(log_writer.log_dir))
 
@@ -57,7 +58,15 @@ def train_one_epoch(model: torch.nn.Module,
         if not math.isfinite(loss_value):
             print("Loss is {}, stopping training".format(loss_value))
             sys.exit(1)
-
+        
+        # optimizer.zero_grad()
+        # this attribute is added by timm on one optimizer (adahessian)
+        # is_second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
+        # grad_norm = loss_scaler(loss, optimizer, 
+        #                         clip_grad=max_norm,
+        #                         parameters=model.parameters(), create_graph=is_second_order)
+        # loss_scale_value = loss_scaler.state_dict()["scale"]
+        
         loss /= accum_iter
         loss_scaler(loss, optimizer, parameters=model.parameters(),
                     update_grad=(data_iter_step + 1) % accum_iter == 0)
@@ -67,11 +76,24 @@ def train_one_epoch(model: torch.nn.Module,
         torch.cuda.synchronize()
 
         metric_logger.update(loss=loss_value)
+        # metric_logger.update(loss_scale=loss_scale_value)
+        min_lr = 10.
+        max_lr = 0.
+        for group in optimizer.param_groups:
+            min_lr = min(min_lr, group["lr"])
+            max_lr = max(max_lr, group["lr"])
 
-        lr = optimizer.param_groups[0]["lr"]
-        metric_logger.update(lr=lr)
-
-        loss_value_reduce = misc.all_reduce_mean(loss_value)
+        metric_logger.update(lr=max_lr)
+        metric_logger.update(min_lr=min_lr)
+        
+        # weight_decay_value = None
+        # for group in optimizer.param_groups:
+        #     if group["weight_decay"] > 0:
+        #         weight_decay_value = group["weight_decay"]
+        # metric_logger.update(weight_decay=weight_decay_value)
+        # metric_logger.update(grad_norm=grad_norm)
+        
+        # loss_value_reduce = misc.all_reduce_mean(loss_value)
         # if log_writer is not None and (data_iter_step + 1) % accum_iter == 0:
         #     """ We use epoch_1000x as the x-axis in tensorboard.
         #     This calibrates different curves when batch size changes.

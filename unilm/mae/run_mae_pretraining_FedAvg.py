@@ -64,6 +64,8 @@ def get_args():
     # Optimizer parameters
     parser.add_argument('--weight_decay', type=float, default=0.05,
                         help='weight decay (default: 0.05)')
+    parser.add_argument('--clip_grad', type=float, default=None, metavar='NORM',
+                        help='Clip gradient norm (default: None, no clipping)')
 
     parser.add_argument('--lr', type=float, default=None, metavar='LR',
                         help='learning rate (absolute lr)')
@@ -243,6 +245,7 @@ def main(args, model):
                     model, data_loader_train,
                     optimizer, device, epoch, loss_scaler,
                     cur_single_client,
+                    max_norm=args.clip_grad,
                     proxy_single_client=proxy_single_client,
                     log_writer=log_writer,
                     args=args
