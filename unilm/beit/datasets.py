@@ -83,7 +83,7 @@ class DataAugmentationForPretrain(object):
                 ])
             elif args.data_set == 'COVIDfl':
                 self.common_transform = transforms.Compose([
-                    transforms.CenterCrop(args.input_size),
+                    # transforms.CenterCrop(args.input_size),
                     # transforms.ColorJitter(0.4, 0.4, 0.4),
                     transforms.ColorJitter(hue=.05, saturation=.05),
                     transforms.RandomHorizontalFlip(p=0.5),
@@ -276,9 +276,9 @@ def build_transform(is_train, args):
                         
         else:
             transform = transforms.Compose([
-                # transforms.Resize([args.input_size, args.input_size]),
-                transforms.Resize([256, 256]),
-                transforms.CenterCrop(args.input_size),
+                transforms.Resize([args.input_size, args.input_size]),
+                # transforms.Resize([256, 256]),
+                # transforms.CenterCrop(args.input_size),
                 transforms.ToTensor(),
                 transforms.Normalize(
                     mean=torch.tensor(mean),
