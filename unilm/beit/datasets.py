@@ -33,8 +33,10 @@ CIFAR10_DEFAULT_STD = (0.24703223, 0.24348513, 0.26158784)
 RETINA_MEAN = (0.5007, 0.5010, 0.5019)
 RETINA_STD = (0.0342, 0.0535, 0.0484)
 
-COVIDX_MEAN = (0.5518, 0.5518, 0.5518)
-COVIDX_STD = (0.2051, 0.2051, 0.2051)
+# COVIDX_MEAN = (0.5518, 0.5518, 0.5518)
+# COVIDX_STD = (0.2051, 0.2051, 0.2051)
+COVIDX_MEAN = [0.485, 0.456, 0.406]
+COVIDX_STD = [0.229, 0.224, 0.225]
 
 class DataAugmentationForPretrain(object):
     def __init__(self, args):
@@ -48,7 +50,7 @@ class DataAugmentationForPretrain(object):
             std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
         elif args.data_set == 'Retina':
             mean, std = RETINA_MEAN, RETINA_STD
-        # elif args.data_set == 'COVIDx':
+        # elif args.data_set == 'COVIDfl':
         #     mean, std = COVIDX_MEAN, COVIDX_STD
         else:
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
@@ -82,12 +84,13 @@ class DataAugmentationForPretrain(object):
             elif args.data_set == 'COVIDfl':
                 self.common_transform = transforms.Compose([
                     transforms.CenterCrop(args.input_size),
-                    transforms.ColorJitter(0.4, 0.4, 0.4),
+                    # transforms.ColorJitter(0.4, 0.4, 0.4),
+                    transforms.ColorJitter(hue=.05, saturation=.05),
                     transforms.RandomHorizontalFlip(p=0.5),
                     # transforms.RandomRotation(10),
                     RandomResizedCropAndInterpolationWithTwoPic(
                         size=args.input_size, second_size=args.second_input_size,
-                        scale=(0.2, 1.0),
+                        scale=(0.4, 1.0),
                         interpolation=args.train_interpolation,
                         second_interpolation=args.second_interpolation,
                     ),
@@ -210,7 +213,7 @@ def build_transform(is_train, args):
         std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
     elif args.data_set == 'Retina':
         mean, std = RETINA_MEAN, RETINA_STD
-    # elif args.data_set == 'COVIDx':
+    # elif args.data_set == 'COVIDfl':
     #     mean, std = COVIDX_MEAN, COVIDX_STD
     else:
         mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
@@ -261,8 +264,9 @@ def build_transform(is_train, args):
                     ])
             elif args.data_set == 'COVIDfl':
                 transform = transforms.Compose([
-                    transforms.CenterCrop(args.input_size),
-                    transforms.RandomRotation(degrees=10),
+                    # transforms.CenterCrop(args.input_size),
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
+                    transforms.RandomRotation(degrees=20, resample=Image.BILINEAR),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(
@@ -272,10 +276,19 @@ def build_transform(is_train, args):
                         
         else:
             transform = transforms.Compose([
-                transforms.Resize([args.input_size, args.input_size]),
+                # transforms.Resize([args.input_size, args.input_size]),
+                transforms.Resize([256, 256]),
+                transforms.CenterCrop(args.input_size),
                 transforms.ToTensor(),
                 transforms.Normalize(
                     mean=torch.tensor(mean),
                     std=torch.tensor(std))
                 ])
     return transform
+
+# transforms.ColorJitter(hue=.05, saturation=.05),
+# transforms.RandomHorizontalFlip(),
+# transforms.RandomRotation(15, resample=Image.BILINEAR),
+# transforms.RandomResizedCrop(image_size, scale=(0.9, 1.0)),
+        
+# https://github.com/joycebyang/covidx/blob/master/pretrain/train.ipynb

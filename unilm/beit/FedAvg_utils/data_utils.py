@@ -76,7 +76,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
                 img = resize(img, (256, 256))
             elif self.args.data_set == 'COVIDfl':
                 img = np.array(Image.open(path))
-                img = process_covidx_image(img, size=256)
+                # img = process_covidx_image(img, top_percent=0)
             
             # print(np.max(img), np.min(img))
             if img.ndim < 3:
@@ -167,8 +167,10 @@ class DatasetFLBEiT(data.Dataset):
                 img = resize(img, (256, 256))
                 
             elif self.args.data_set == 'COVIDfl':
-                img = np.array(Image.open(path))
-                img = process_covidx_image(img, size=256)
+                # img = np.array(Image.open(path))
+                # img = cv2.imread(path)
+                img = np.array(Image.open(path).convert("RGB"))
+                # img = process_covidx_image(img)
             
             # print(np.max(img), np.min(img))
             if img.ndim < 3:
@@ -298,6 +300,14 @@ def process_covidx_image(img, size=224, top_percent=0.08, crop=False):
     img = img * 255
     return img
 
+def process_covidx_image_v2(img, size=224):
+    img = cv2.resize(img, (size, size))
+    img = img.astype('float64')
+    img -= img.mean()
+    img /= img.std()
+    # img = img * 255
+    return img
+    
 def random_ratio_resize(img, prob=0.3, delta=0.1):
     if np.random.rand() >= prob:
         return img

@@ -8,7 +8,7 @@
 # https://github.com/rwightman/pytorch-image-models/tree/master/timm
 # https://github.com/facebookresearch/deit
 # https://github.com/facebookresearch/dino
-# --------------------------------------------------------'
+# --------------------------------------------------------
 import argparse
 import datetime
 import numpy as np
@@ -255,7 +255,12 @@ def main(args, model):
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
-        dataset_val = DatasetFLBEiT(args=args, phase='test')
+        dataset_val = DatasetFLBEiT(args=args, phase='val')
+    
+    if args.eval:
+        dataset_test = DatasetFLBEiT(args=args, phase='test')
+    else:
+        dataset_test = None
     
     num_tasks = utils.get_world_size()
     global_rank = utils.get_rank()
@@ -269,18 +274,29 @@ def main(args, model):
                 dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=True)  # shuffle=True to reduce monitor bias
     else:
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+    sampler_test = torch.utils.data.SequentialSampler(dataset_test)
         
     if dataset_val is not None:
         data_loader_val = torch.utils.data.DataLoader(
             dataset_val, sampler=sampler_val,
-            # batch_size=args.batch_size,
-            batch_size=int(1.5 * args.batch_size),
+            batch_size=args.batch_size,
             num_workers=args.num_workers,
             pin_memory=args.pin_mem,
             drop_last=False
         )
     else:
         data_loader_val = None
+        
+    if dataset_test is not None:
+        data_loader_test = torch.utils.data.DataLoader(
+            dataset_test, sampler=sampler_test,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            pin_memory=args.pin_mem,
+            drop_last=False
+        )
+    else:
+        data_loader_test = None
     
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all, mixupfn_all = Partial_Client_Selection(args, model, mode='finetune')
@@ -317,8 +333,6 @@ def main(args, model):
         cur_tot_client_Lens = 0
         for client in cur_selected_clients:
             cur_tot_client_Lens += args.clients_with_len[client]
-        
-        val_loader_proxy_clients = {}
 
         for cur_single_client, proxy_single_client in zip(cur_selected_clients, args.proxy_clients):
             print('cur_single_client: ', cur_single_client)
@@ -350,7 +364,6 @@ def main(args, model):
                 pin_memory=args.pin_mem,
                 drop_last=True,
             )
-            val_loader_proxy_clients[proxy_single_client] = data_loader_val
             
             # ---- prepare model for a client
             model = model_all[proxy_single_client]
@@ -400,9 +413,8 @@ def main(args, model):
                     args=args, model=model, model_without_ddp=model_without_ddp,
                     optimizer=optimizer, loss_scaler=loss_scaler, model_ema=model_ema)
                 
-                test_stats = valid(args, model, val_loader_proxy_clients[proxy_single_client], 
-                                   data_loader_test=None, TestFlag=False)
-                print(f"Accuracy of the network on the {len(dataset_val)} val images: {test_stats['acc1']:.1f}%")
+                test_stats = valid(args, model, data_loader_test)
+                print(f"Accuracy of the network on the {len(dataset_test)} test images: {test_stats['acc1']:.1f}%")
                 model.cpu()
                 
                 exit(0)
@@ -460,9 +472,8 @@ def main(args, model):
         
         if data_loader_val is not None:
             model_avg.to(args.device)
-            test_stats = valid(args, model_avg, val_loader_proxy_clients[proxy_single_client], 
-                               data_loader_test=None, TestFlag=False)
-            print(f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.1f}%")
+            test_stats = valid(args, model_avg, data_loader_val)
+            print(f"Accuracy of the network on the {len(dataset_val)} validation images: {test_stats['acc1']:.1f}%")
             
             if max_accuracy < test_stats["acc1"]:
                 max_accuracy = test_stats["acc1"]
@@ -471,7 +482,7 @@ def main(args, model):
                         args=args, model=model_avg, 
                         model_without_ddp=model_without_ddp, optimizer=optimizer,
                         loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
-                
+            
             print(f'Max accuracy: {max_accuracy:.2f}%')
             if log_writer is not None:
                 log_writer.update(test_acc1=test_stats['acc1'], head="perf", step=epoch)
