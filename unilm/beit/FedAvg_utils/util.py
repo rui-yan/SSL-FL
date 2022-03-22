@@ -46,7 +46,7 @@ def save_model(args, model):
     # print("Saved model checkpoint to [DIR: %s]", args.output_dir)
 
 
-def inner_valid(args, model, data_loader):
+def valid(args, model, data_loader):
     # eval_losses = AverageMeter()
     criterion = torch.nn.CrossEntropyLoss()
     metric_logger = utils.MetricLogger(delimiter="  ")
@@ -66,9 +66,15 @@ def inner_valid(args, model, data_loader):
         with torch.no_grad():
             output = model(images)
             loss = criterion(output, target)
-
+        
         acc1, _ = accuracy(output, target, topk=(1, 2))
-
+        
+        if args.eval:
+            from sklearn.metrics import confusion_matrix
+            pred = output.argmax(axis=-1)
+            mat = confusion_matrix(target.cpu().detach().numpy(), pred.cpu().detach().numpy(), labels=[0, 1])      
+            print('confusion_matrix: \n', mat)
+        
         batch_size = images.shape[0]
         metric_logger.update(loss=loss.item())
         metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
@@ -139,9 +145,9 @@ def metric_evaluation(args, eval_result):
     return Flag
 
 
-def valid(args, model, data_loader_val, data_loader_test = None, TestFlag = False):
-    # Validation!
-    return inner_valid(args, model, data_loader_val)
+# def valid(args, model, data_loader_val, data_loader_test = None, TestFlag = False):
+#     # Validation!
+#     return inner_valid(args, model, data_loader_val)
     
     # eval_result, eval_losses = inner_valid(args, model, data_loader_val)
     

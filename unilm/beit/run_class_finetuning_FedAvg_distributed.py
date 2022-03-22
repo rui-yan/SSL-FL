@@ -256,7 +256,7 @@ def main(args, model):
         dataset_val = None
     else:
         dataset_val = DatasetFLBEiT(args=args, phase='val')
-        
+    
     if args.eval:
         dataset_test = DatasetFLBEiT(args=args, phase='test')
     else:
@@ -288,7 +288,7 @@ def main(args, model):
         data_loader_val = None
         
     if dataset_test is not None:
-        data_laoder_test = torch.utils.data.DataLoader(
+        data_loader_test = torch.utils.data.DataLoader(
             dataset_test, sampler=sampler_test,
             batch_size=args.batch_size,
             num_workers=args.num_workers,

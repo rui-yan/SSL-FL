@@ -50,8 +50,8 @@ class DataAugmentationForPretrain(object):
             std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
         elif args.data_set == 'Retina':
             mean, std = RETINA_MEAN, RETINA_STD
-        elif args.data_set == 'COVIDfl':
-            mean, std = COVIDX_MEAN, COVIDX_STD
+        # elif args.data_set == 'COVIDfl':
+        #     mean, std = COVIDX_MEAN, COVIDX_STD
         else:
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
@@ -265,8 +265,8 @@ def build_transform(is_train, args):
             elif args.data_set == 'COVIDfl':
                 transform = transforms.Compose([
                     # transforms.CenterCrop(args.input_size),
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.)),                    
-                    transforms.RandomRotation(degrees=10, resample=Image.BILINEAR),
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
+                    transforms.RandomRotation(degrees=20, resample=Image.BILINEAR),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(
