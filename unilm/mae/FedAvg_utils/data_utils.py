@@ -15,7 +15,7 @@ import torch
 import torch.utils.data as data
 from torchvision import transforms
 
-class DatasetFLBEiTPretrain(data.Dataset):
+class DatasetFLPretrain(data.Dataset):
     def __init__(self, args, no_transform=False):    
         self.transform = None
         
@@ -97,7 +97,7 @@ class DatasetFLBEiTPretrain(data.Dataset):
             return len(self.img_paths)
 
 
-class DatasetFLBEiT(data.Dataset):
+class DatasetFLFinetune(data.Dataset):
     def __init__(self, args, phase):
         super(DatasetFLBEiT, self).__init__()
         self.phase = phase        

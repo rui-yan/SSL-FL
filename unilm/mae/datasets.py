@@ -19,9 +19,9 @@ from timm.data.constants import \
 from transforms import RandomResizedCropAndInterpolationWithTwoPic
 from timm.data import create_transform
 
-from dall_e.utils import map_pixels
-from masking_generator import MaskingGenerator
-from dataset_folder import ImageFolder
+# from dall_e.utils import map_pixels
+# from masking_generator import MaskingGenerator
+# from dataset_folder import ImageFolder
 from PIL import Image
 from skimage.transform import resize
 

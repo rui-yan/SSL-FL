@@ -121,7 +121,7 @@ def get_args():
                         help='Use class token instead of global pool for classification')
 
     # Dataset parameters\
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDx', 'CIFAR100', 
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'CIFAR100', 
                                                                 'IMNET', 'Retina', 'image_folder'],
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
@@ -167,7 +167,7 @@ def get_args():
                         help="Total communication rounds.")
     parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")
-    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "central"], 
+    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "split_real", "central"], 
                         default="central", help="Which data partitions to use")
 
     return parser.parse_args()
