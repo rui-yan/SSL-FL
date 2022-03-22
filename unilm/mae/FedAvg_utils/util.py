@@ -21,6 +21,8 @@ from optim_factory import create_optimizer, get_parameter_groups, LayerDecayValu
 
 from timm.models.layers import trunc_normal_
 
+import timm.optim.optim_factory as optim_factory
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
     def __init__(self):
@@ -245,8 +247,6 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         if args.model_name == 'beit':
             msg = model.load_state_dict(checkpoint_model, strict=False)
             # misc.load_state_dict(model, checkpoint_model, prefix=args.model_prefix)
-            # manually initialize fc layer
-            trunc_normal_(model.head.weight, std=2e-5)
             
         elif args.model_name == 'mae':
             msg = model.load_state_dict(checkpoint_model, strict=False)
@@ -257,8 +257,8 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
             else:
                 assert set(msg.missing_keys) == {'head.weight', 'head.bias'}
         
-            # manually initialize fc layer
-            trunc_normal_(model.head.weight, std=2e-5)
+        # manually initialize fc layer
+        trunc_normal_(model.head.weight, std=2e-5)
     
     if args.distributed:
         if args.sync_bn:
