@@ -33,13 +33,13 @@ CIFAR10_DEFAULT_STD = (0.24703223, 0.24348513, 0.26158784)
 RETINA_MEAN = (0.5007, 0.5010, 0.5019)
 RETINA_STD = (0.0342, 0.0535, 0.0484)
 
-COVIDX_MEAN = (0.5518, 0.5518, 0.5518)
-COVIDX_STD = (0.2051, 0.2051, 0.2051)
+# COVIDX_MEAN = (0.5518, 0.5518, 0.5518)
+# COVIDX_STD = (0.2051, 0.2051, 0.2051)
+COVIDX_MEAN = [0.485, 0.456, 0.406]
+COVIDX_STD = [0.229, 0.224, 0.225]
 
 class DataAugmentationForPretrain(object):
     def __init__(self, args):
-        
-        self.args = args
         
         if args.data_set == 'CIFAR10':
             mean = CIFAR10_DEFAULT_MEAN
@@ -83,18 +83,18 @@ class DataAugmentationForPretrain(object):
                 ])
             elif args.data_set == 'COVIDfl':
                 self.common_transform = transforms.Compose([
-                    transforms.CenterCrop(args.input_size),
-                    transforms.ColorJitter(0.4, 0.4, 0.4),
+                    # transforms.CenterCrop(args.input_size),
+                    # transforms.ColorJitter(0.4, 0.4, 0.4),
+                    transforms.ColorJitter(hue=.05, saturation=.05),
                     transforms.RandomHorizontalFlip(p=0.5),
                     # transforms.RandomRotation(10),
                     RandomResizedCropAndInterpolationWithTwoPic(
                         size=args.input_size, second_size=args.second_input_size,
-                        scale=(0.2, 1.0),
+                        scale=(0.4, 1.0),
                         interpolation=args.train_interpolation,
                         second_interpolation=args.second_interpolation,
                     ),
                 ])
-                
             
             # visual_token_transform
             if args.discrete_vae_type == "dall-e":
@@ -112,17 +112,16 @@ class DataAugmentationForPretrain(object):
                 ])
             else:
                 raise NotImplementedError()
+                
+            self.masked_position_generator = MaskingGenerator(
+                args.window_size, num_masking_patches=args.num_mask_patches,
+                max_num_patches=args.max_mask_patches_per_block,
+                min_num_patches=args.min_mask_patches_per_block,
+            )
         
         elif args.model_name == 'mae':
             # common_transform
-            if args.aug == 'aug_2':
-                self.common_transform = transforms.Compose([
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-                    transforms.RandomGrayscale(p=0.2),
-                    transforms.ColorJitter(0.4, 0.4, 0.4),
-                    transforms.RandomHorizontalFlip(p=0.5)])
-            elif args.aug == 'aug_1':
-                self.common_transform = transforms.Compose([
+            self.common_transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
                     transforms.RandomHorizontalFlip(p=0.5)])
         
@@ -132,6 +131,8 @@ class DataAugmentationForPretrain(object):
                 mean=torch.tensor(mean),
                 std=torch.tensor(std))
         ])
+        
+        self.args = args
         
     
     def __call__(self, image):
@@ -152,15 +153,55 @@ class DataAugmentationForPretrain(object):
             repr += "  visual_tokens_transform = %s,\n" % str(self.visual_token_transform)
             repr += "  Masked position generator = %s,\n" % str(self.masked_position_generator)
             repr += ")"
+            
         elif self.args.model_name == 'mae':
             repr = "(DataAugmentationFoMAE,\n"
             repr += "  common_transform = %s,\n" % str(self.common_transform)
             repr += "  patch_transform = %s,\n" % str(self.patch_transform)
-            repr += ")"
+        
         return repr
 
+    
+def build_dataset(is_train, args):
+    transform = build_transform(is_train, args)
 
-def build_transform(is_train, args): # TODO FOR MAE
+    print("Transform = ")
+    if isinstance(transform, tuple):
+        for trans in transform:
+            print(" - - - - - - - - - - ")
+            for t in trans.transforms:
+                print(t)
+    else:
+        for t in transform.transforms:
+            print(t)
+    print("---------------------------")
+
+    if args.data_set == 'CIFAR10':
+        dataset = datasets.CIFAR10(args.data_path, train=is_train, 
+                                   download=True, transform=transform)
+        nb_classes = 10
+    elif args.data_set == 'CIFAR100':
+        dataset = datasets.CIFAR100(args.data_path, train=is_train, 
+                                   download=True, transform=transform)
+        nb_classes = 100
+    elif args.data_set == 'IMNET':
+        root = os.path.join(args.data_path, 'train' if is_train else 'val')
+        dataset = datasets.ImageFolder(root, transform=transform)
+        nb_classes = 1000
+    elif args.data_set == "image_folder":
+        root = args.data_path if is_train else args.eval_data_path
+        dataset = ImageFolder(root, transform=transform)
+        nb_classes = args.nb_classes
+        assert len(dataset.class_to_idx) == nb_classes
+    else:
+        raise NotImplementedError()
+    assert nb_classes == args.nb_classes
+    print("Number of the class = %d" % args.nb_classes)
+
+    return dataset, nb_classes
+
+
+def build_transform(is_train, args):
     resize_im = args.input_size > 32
     
     if args.data_set == 'CIFAR10':
@@ -172,7 +213,7 @@ def build_transform(is_train, args): # TODO FOR MAE
         std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
     elif args.data_set == 'Retina':
         mean, std = RETINA_MEAN, RETINA_STD
-    # elif args.data_set == 'COVIDfl' or args.data_set == 'COVIDfl':
+    # elif args.data_set == 'COVIDfl':
     #     mean, std = COVIDX_MEAN, COVIDX_STD
     else:
         mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
@@ -222,9 +263,10 @@ def build_transform(is_train, args): # TODO FOR MAE
                         std=torch.tensor(std))
                     ])
             elif args.data_set == 'COVIDfl':
-                transforms.CenterCrop(args.input_size),
                 transform = transforms.Compose([
-                    transforms.RandomRotation(degrees=10),
+                    # transforms.CenterCrop(args.input_size),
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
+                    transforms.RandomRotation(degrees=20, resample=Image.BILINEAR),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(
@@ -235,6 +277,8 @@ def build_transform(is_train, args): # TODO FOR MAE
         else:
             transform = transforms.Compose([
                 transforms.Resize([args.input_size, args.input_size]),
+                # transforms.Resize([256, 256]),
+                # transforms.CenterCrop(args.input_size),
                 transforms.ToTensor(),
                 transforms.Normalize(
                     mean=torch.tensor(mean),
@@ -242,41 +286,9 @@ def build_transform(is_train, args): # TODO FOR MAE
                 ])
     return transform
 
-
-# def build_dataset(is_train, args):
-#     transform = build_transform(is_train, args)
-
-#     print("Transform = ")
-#     if isinstance(transform, tuple):
-#         for trans in transform:
-#             print(" - - - - - - - - - - ")
-#             for t in trans.transforms:
-#                 print(t)
-#     else:
-#         for t in transform.transforms:
-#             print(t)
-#     print("---------------------------")
-
-#     if args.data_set == 'CIFAR10':
-#         dataset = datasets.CIFAR10(args.data_path, train=is_train, 
-#                                    download=True, transform=transform)
-#         nb_classes = 10
-#     elif args.data_set == 'CIFAR100':
-#         dataset = datasets.CIFAR100(args.data_path, train=is_train, 
-#                                    download=True, transform=transform)
-#         nb_classes = 100
-#     elif args.data_set == 'IMNET':
-#         root = os.path.join(args.data_path, 'train' if is_train else 'val')
-#         dataset = datasets.ImageFolder(root, transform=transform)
-#         nb_classes = 1000
-#     elif args.data_set == "image_folder":
-#         root = args.data_path if is_train else args.eval_data_path
-#         dataset = ImageFolder(root, transform=transform)
-#         nb_classes = args.nb_classes
-#         assert len(dataset.class_to_idx) == nb_classes
-#     else:
-#         raise NotImplementedError()
-#     assert nb_classes == args.nb_classes
-#     print("Number of the class = %d" % args.nb_classes)
-
-#     return dataset, nb_classes
+# transforms.ColorJitter(hue=.05, saturation=.05),
+# transforms.RandomHorizontalFlip(),
+# transforms.RandomRotation(15, resample=Image.BILINEAR),
+# transforms.RandomResizedCrop(image_size, scale=(0.9, 1.0)),
+        
+# https://github.com/joycebyang/covidx/blob/master/pretrain/train.ipynb

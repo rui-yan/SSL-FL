@@ -54,7 +54,7 @@ def save_model(args, model):
     # print("Saved model checkpoint to [DIR: %s]", args.output_dir)
 
 
-def inner_valid(args, model, data_loader):
+def valid(args, model, data_loader):
     # eval_losses = AverageMeter()
     criterion = torch.nn.CrossEntropyLoss()
     metric_logger = misc.MetricLogger(delimiter="  ")
@@ -147,9 +147,9 @@ def metric_evaluation(args, eval_result):
     return Flag
 
 
-def valid(args, model, data_loader_val, data_loader_test = None, TestFlag = False):
-    # Validation!
-    return inner_valid(args, model, data_loader_val)
+# def valid(args, model, data_loader_val, data_loader_test = None, TestFlag = False):
+#     # Validation!
+#     return inner_valid(args, model, data_loader_val)
     
     # eval_result, eval_losses = inner_valid(args, model, data_loader_val)
     

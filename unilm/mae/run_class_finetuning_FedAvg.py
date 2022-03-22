@@ -121,7 +121,7 @@ def get_args():
                         help='Use class token instead of global pool for classification')
 
     # Dataset parameters\
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDx', 'CIFAR100', 
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'CIFAR100', 
                                                                 'IMNET', 'Retina', 'image_folder'],
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
@@ -167,7 +167,7 @@ def get_args():
                         help="Total communication rounds.")
     parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")
-    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "central"], 
+    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "split_real", "central"], 
                         default="central", help="Which data partitions to use")
 
     return parser.parse_args()
@@ -192,7 +192,12 @@ def main(args, model):
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
-        dataset_val = DatasetFLFinetune(args=args, phase='test')
+        dataset_val = DatasetFLBEiT(args=args, phase='val')
+    
+    if args.eval:
+        dataset_test = DatasetFLBEiT(args=args, phase='test')
+    else:
+        dataset_test = None
     
     num_tasks = misc.get_world_size()
     global_rank = misc.get_rank()
@@ -206,7 +211,8 @@ def main(args, model):
                 dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=True)  # shuffle=True to reduce monitor bias
     else:
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
-    
+    sampler_test = torch.utils.data.SequentialSampler(dataset_test)
+        
     if dataset_val is not None:
         data_loader_val = torch.utils.data.DataLoader(
             dataset_val, sampler=sampler_val,
@@ -217,6 +223,17 @@ def main(args, model):
         )
     else:
         data_loader_val = None
+        
+    if dataset_test is not None:
+        data_loader_test = torch.utils.data.DataLoader(
+            dataset_test, sampler=sampler_test,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            pin_memory=args.pin_mem,
+            drop_last=False
+        )
+    else:
+        data_loader_test = None
         
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, criterion_all, loss_scaler_all, mixup_fn_all = Partial_Client_Selection(args, model, mode='finetune')
@@ -286,7 +303,6 @@ def main(args, model):
                 pin_memory=args.pin_mem,
                 drop_last=True,
             )
-            val_loader_proxy_clients[proxy_single_client] = data_loader_val
             
             # ---- prepare model for a client
             model = model_all[proxy_single_client]
@@ -329,9 +345,8 @@ def main(args, model):
                 misc.load_model(args=args, model_without_ddp=model_without_ddp,
                                 optimizer=optimizer, loss_scaler=loss_scaler, model_ema=model_ema)
                 
-                test_stats = valid(args, model, val_loader_proxy_clients[proxy_single_client], 
-                                   data_loader_test=None, TestFlag=False)
-                print(f"Accuracy of the network on the {len(dataset_val)} val images: {test_stats['acc1']:.1f}%")
+                test_stats = valid(args, model, data_loader_test)
+                print(f"Accuracy of the network on the {len(dataset_test)} test images: {test_stats['acc1']:.1f}%")
                 model.cpu()
                 
                 exit(0)
@@ -374,9 +389,8 @@ def main(args, model):
         
         if data_loader_val is not None:
             model_avg.to(args.device)
-            test_stats = valid(args, model_avg, val_loader_proxy_clients[proxy_single_client], 
-                               data_loader_test=None, TestFlag=False)
-            print(f"Accuracy of the network on the {len(dataset_val)} test images: {test_stats['acc1']:.1f}%")
+            test_stats = valid(args, model_avg, data_loader_val)
+            print(f"Accuracy of the network on the {len(dataset_val)} validation images: {test_stats['acc1']:.1f}%")
             
             if max_accuracy < test_stats["acc1"]:
                 max_accuracy = test_stats["acc1"]
