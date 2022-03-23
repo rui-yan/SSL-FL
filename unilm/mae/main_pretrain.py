@@ -28,7 +28,7 @@ assert timm.__version__ == "0.3.2"  # version check
 import timm.optim.optim_factory as optim_factory
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+sys.path.insert(0,'..')
 import util.misc as misc
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
 

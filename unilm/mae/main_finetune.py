@@ -29,7 +29,7 @@ from timm.data.mixup import Mixup
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+sys.path.insert(0,'..')
 import util.lr_decay as lrd
 import util.misc as misc
 from util.datasets import build_dataset
