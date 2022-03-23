@@ -272,9 +272,7 @@ def main(args, model):
         cur_tot_client_Lens = 0
         for client in cur_selected_clients:
             cur_tot_client_Lens += args.clients_with_len[client]
-        
-        val_loader_proxy_clients = {}
-        
+
         for cur_single_client, proxy_single_client in zip(cur_selected_clients, args.proxy_clients):
             print('cur_single_client: ', cur_single_client)
             print('proxy_single_client: ', proxy_single_client)
