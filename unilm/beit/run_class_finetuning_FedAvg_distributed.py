@@ -445,7 +445,7 @@ def main(args, model):
                              'epoch': epoch,
                              'inner_epoch': inner_epoch,
                              'n_parameters': n_parameters}
-                
+
                 if args.output_dir and misc.is_main_process():
                     if log_writer is not None:
                         log_writer.flush()

@@ -35,7 +35,6 @@ import sys
 sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
 
 import util.misc as misc
-
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
 from FedAvg_utils.data_utils import DatasetFLPretrain, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
@@ -160,6 +159,7 @@ def main(args, model):
         log_writer = None
     
     # ---------- Train! (use different clients)
+    print("=============== Running pre-training ===============")
     tot_clients = args.dis_cvs_files
     print('total_clients: ', tot_clients)
     epoch = -1

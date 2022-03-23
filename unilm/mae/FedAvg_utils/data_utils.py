@@ -28,7 +28,7 @@ class DatasetFLPretrain(data.Dataset):
             self.data = self.data_all['data'][args.single_client]
             self.labels = self.data_all['target'][args.single_client]
             
-        elif args.data_set == 'Retina' or args.data_set == 'COVIDfl' or args.data_set == 'ISIC':
+        elif args.data_set == 'Retina' or args.data_set == 'COVIDfl':
             
             if args.split_type == 'central':
                 cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
@@ -74,9 +74,9 @@ class DatasetFLPretrain(data.Dataset):
             if self.args.data_set == 'Retina':
                 img = np.load(path)
                 img = resize(img, (256, 256))
-            # elif self.args.data_set == 'COVIDfl':
-            else:
-                img = np.array(Image.open(path).convert("RGB"))
+            elif self.args.data_set == 'COVIDfl':
+                img = np.array(Image.open(path))
+                # img = process_covidx_image(img, top_percent=0)
             
             # print(np.max(img), np.min(img))
             if img.ndim < 3:
@@ -93,13 +93,13 @@ class DatasetFLPretrain(data.Dataset):
     def __len__(self):
         if self.args.data_set == 'CIFAR10':
             return len(self.data)
-        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDfl' or self.args.data_set == 'ISIC':
+        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDfl':
             return len(self.img_paths)
 
 
 class DatasetFLFinetune(data.Dataset):
     def __init__(self, args, phase):
-        super(DatasetFLFinetune, self).__init__()
+        super(DatasetFLBEiT, self).__init__()
         self.phase = phase        
         is_train = (phase == 'train')
         
@@ -118,7 +118,7 @@ class DatasetFLFinetune(data.Dataset):
                 self.labels = data_all['union_' + phase]['target']
         
         # Retina dataset
-        elif args.data_set == 'Retina' or args.data_set == 'COVIDfl' or args.data_set == 'ISIC':
+        elif args.data_set == 'Retina' or args.data_set == 'COVIDfl':
             if self.phase == 'test':
                 args.single_client = os.path.join(args.data_path, 'test.csv')
             elif self.phase == 'val':
@@ -165,10 +165,12 @@ class DatasetFLFinetune(data.Dataset):
             if self.args.data_set == 'Retina':
                 img = np.load(path)
                 img = resize(img, (256, 256))
-
-            else:
-            # elif self.args.data_set == 'COVIDfl':
+                
+            elif self.args.data_set == 'COVIDfl':
+                # img = np.array(Image.open(path))
+                # img = cv2.imread(path)
                 img = np.array(Image.open(path).convert("RGB"))
+                # img = process_covidx_image(img)
             
             # print(np.max(img), np.min(img))
             if img.ndim < 3:
@@ -185,7 +187,7 @@ class DatasetFLFinetune(data.Dataset):
     def __len__(self):
         if self.args.data_set == 'CIFAR10':
             return len(self.data)
-        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDfl' or self.args.data_set == 'ISIC':
+        elif self.args.data_set == 'Retina' or self.args.data_set == 'COVIDfl':
             return len(self.img_paths)
 
 
@@ -205,7 +207,7 @@ def create_dataset_and_evalmetrix(args, mode='pretrain'):
         args.dis_cvs_files =[key for key in data_all['data'].keys() if 'train' in key]
         args.clients_with_len = {name: data_all['data'][name].shape[0] for name in args.dis_cvs_files}
     
-    elif args.data_set == 'Retina' or args.data_set == 'COVIDfl' or args.data_set == 'ISIC':
+    elif args.data_set == 'Retina' or args.data_set == 'COVIDfl':
         if args.split_type == 'central':
             args.dis_cvs_files = os.listdir(os.path.join(args.data_path, args.split_type))
         else:
