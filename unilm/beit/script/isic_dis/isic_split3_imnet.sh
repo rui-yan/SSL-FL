@@ -5,7 +5,7 @@ MODEL_NAME='beit'
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
 DATASET='ISIC'
-SPLIT_TYPE='split_real'
+SPLIT_TYPE='split_3'
 N_CLASSES=7
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
@@ -14,7 +14,8 @@ MASK_RATIO=0.4
 # ------------------ finetune ----------------- #
 FT_EPOCHS=100
 FT_LR='3e-3'
-FT_BATCH_SIZE=32
+FT_BATCH_SIZE=64
+
 OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/imnet_pretrained_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis4"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_class_finetuning_FedAvg_distributed.py \

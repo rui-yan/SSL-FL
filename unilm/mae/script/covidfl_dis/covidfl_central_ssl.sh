@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MODEL_NAME='beit'
+MODEL_NAME='mae'
 
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
@@ -9,7 +9,7 @@ SPLIT_TYPE='central'
 N_CLASSES=3
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=7
-MASK_RATIO=0.4
+MASK_RATIO=0.6
 
 # ------------------ pretrain ----------------- #--
 EPOCHS=1000

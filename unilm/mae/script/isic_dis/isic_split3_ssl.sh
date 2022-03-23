@@ -4,13 +4,14 @@ MODEL_NAME='mae'
 
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
-DATASET='Retina'
-SPLIT_TYPE='central'
-N_CLASSES=2
+DATASET='ISIC'
+SPLIT_TYPE='split_3'
+N_CLASSES=7
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
 MASK_RATIO=0.6
 AUG='aug_2'
+
 # ------------------ pretrain ----------------- #--
 EPOCHS=1600
 BLR='1.5e-3'
@@ -35,7 +36,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launc
         --norm_pix_loss --sync_bn \
         --aug ${AUG} \
         --n_clients ${N_CLIENTS} --E_epoch 1  --num_local_clients -1 \
-
 
 # ------------------ finetune ----------------- #
 CKPT_PATH="${OUTPUT_PATH}/checkpoint-1599.pth"

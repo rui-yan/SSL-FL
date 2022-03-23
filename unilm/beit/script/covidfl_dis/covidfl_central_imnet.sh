@@ -12,7 +12,7 @@ N_CLIENTS=7
 MASK_RATIO=0.4
 
 # ------------------ finetune ----------------- #
-FT_EPOCHS=30
+FT_EPOCHS=50
 FT_LR='3e-3'
 FT_BATCH_SIZE=16
 

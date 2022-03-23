@@ -4,18 +4,17 @@ MODEL_NAME='beit'
 
 cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
 
-DATASET='ISIC'
+DATASET='COVIDfl'
 SPLIT_TYPE='split_real'
-N_CLASSES=7
+N_CLASSES=3
 DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
-N_CLIENTS=5
+N_CLIENTS=7
 MASK_RATIO=0.4
 
 # ------------------ pretrain ----------------- #--
 EPOCHS=1000
 LR='1.5e-3'
-BATCH_SIZE=32
-
+BATCH_SIZE=16
 OUTPUT_PATH="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_lr${LR}_bs${BATCH_SIZE}_ratio${MASK_RATIO}_dis4"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_beit_pretraining_FedAvg_distributed.py \
@@ -36,9 +35,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launc
 
 # ------------------ finetune ----------------- #
 CKPT_PATH="${OUTPUT_PATH}/checkpoint-999.pth"
-FT_EPOCHS=100
+FT_EPOCHS=50
 FT_LR='3e-3'
-FT_BATCH_SIZE=32
+FT_BATCH_SIZE=16
 OUTPUT_PATH_FT="${OUTPUT_PATH}/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis4"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_class_finetuning_FedAvg_distributed.py \
