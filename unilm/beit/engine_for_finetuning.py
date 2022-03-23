@@ -10,7 +10,6 @@
 # https://github.com/facebookresearch/dino
 # --------------------------------------------------------'
 import math
-import sys
 from typing import Iterable, Optional
 
 import torch
@@ -18,8 +17,9 @@ import torch
 from timm.data import Mixup
 from timm.utils import accuracy, ModelEma
 
-import utils
-
+import sys
+sys.path.insert(0,'..')
+import util.misc as misc
 
 def train_class_batch(model, samples, target, criterion):
     outputs = model(samples)
@@ -43,9 +43,9 @@ def train_one_epoch(args, model: torch.nn.Module, criterion: torch.nn.Module,
                     start_steps=None, lr_schedule_values=None, wd_schedule_values=None,
                     num_training_steps_per_inner_epoch=None, update_freq=None):
     model.train(True)
-    metric_logger = utils.MetricLogger(delimiter="  ")
-    metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger = misc.MetricLogger(delimiter="  ")
+    metric_logger.add_meter('lr', misc.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('min_lr', misc.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
 
@@ -183,7 +183,7 @@ def train_one_epoch(args, model: torch.nn.Module, criterion: torch.nn.Module,
 def evaluate(data_loader, model, device):
     criterion = torch.nn.CrossEntropyLoss()
     
-    metric_logger = utils.MetricLogger(delimiter="  ")
+    metric_logger = misc.MetricLogger(delimiter="  ")
     header = 'Test:'
 
     # switch to evaluation mode

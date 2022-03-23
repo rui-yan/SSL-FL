@@ -16,6 +16,8 @@ import torch.nn as nn
 
 from timm.models.vision_transformer import PatchEmbed, Block
 
+import sys
+sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
 from util.pos_embed import get_2d_sincos_pos_embed
 
 

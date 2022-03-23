@@ -21,27 +21,28 @@ import os
 from pathlib import Path
 from timm.models import create_model
 
-# from datasets import build_dataset
-
-import utils
-# from scipy import interpolate
-
 import modeling_finetune
 from engine_for_finetuning import train_one_epoch, evaluate
 
 from copy import deepcopy
+
+import sys
+sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+
+import util.misc as misc
+
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
-from FedAvg_utils.data_utils import DatasetFLBEiT, create_dataset_and_evalmetrix
+from FedAvg_utils.data_utils import DatasetFLFinetune, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
 
 def get_args():
     parser = argparse.ArgumentParser('BEiT fine-tuning and evaluation script for image classification', add_help=False)
-    parser.add_argument('--model_name', default='beit', type=str)
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--update_freq', default=1, type=int)
     parser.add_argument('--save_ckpt_freq', default=20, type=int)
     
     # Model parameters
+    parser.add_argument('--model_name', default='beit', type=str)
     parser.add_argument('--model', default='deit_base_patch16_224', type=str, metavar='MODEL',
                         help='Name of model to train')
     parser.add_argument('--rel_pos_bias', action='store_true')
@@ -158,7 +159,7 @@ def get_args():
                         help='number of the classification types')
     parser.add_argument('--imagenet_default_mean_and_std', default=False, action='store_true')
 
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'CIFAR100', 'Retina', 'IMNET', 'COVIDfl', 'image_folder'],
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'ISIC', 'Retina', 'IMNET', 'COVIDfl', 'image_folder'],
                         type=str, help='ImageNet dataset path')
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
@@ -240,12 +241,12 @@ def get_model(args):
 
 def main(args, model):
     
-    utils.init_distributed_mode(args)
+    misc.init_distributed_mode(args)
     
     device = torch.device(args.device)
     
     # fix the seed for reproducibility
-    utils.fix_random_seeds(args)
+    misc.fix_random_seeds(args)
     
     cudnn.benchmark = True
     
@@ -255,15 +256,15 @@ def main(args, model):
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
-        dataset_val = DatasetFLBEiT(args=args, phase='val')
+        dataset_val = DatasetFLFinetune(args=args, phase='test')
     
     if args.eval:
-        dataset_test = DatasetFLBEiT(args=args, phase='test')
+        dataset_test = DatasetFLFinetune(args=args, phase='test')
     else:
         dataset_test = None
     
-    num_tasks = utils.get_world_size()
-    global_rank = utils.get_rank()
+    num_tasks = misc.get_world_size()
+    global_rank = misc.get_rank()
     
     if args.dist_eval:
         if len(dataset_val) % num_tasks != 0:
@@ -304,7 +305,7 @@ def main(args, model):
     
     if args.log_dir is not None:
         os.makedirs(args.log_dir, exist_ok=True)
-        log_writer = utils.TensorboardLogger(log_dir=args.log_dir)
+        log_writer = misc.TensorboardLogger(log_dir=args.log_dir)
     else:
         log_writer = None
     
@@ -342,10 +343,10 @@ def main(args, model):
             args.clients_weightes[proxy_single_client] = args.clients_with_len[cur_single_client] / cur_tot_client_Lens
             
             # ---- get dataset for each client for pretraining finetuning 
-            dataset_train = DatasetFLBEiT(args=args, phase='train')
+            dataset_train = DatasetFLFinetune(args=args, phase='train')
             
-            num_tasks = utils.get_world_size()
-            global_rank = utils.get_rank()
+            num_tasks = misc.get_world_size()
+            global_rank = misc.get_rank()
             
             print(f'=========client: {proxy_single_client} ==============')
             if args.distributed:
@@ -395,7 +396,7 @@ def main(args, model):
             n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
             # print("Model = %s" % str(model_without_ddp))
             # print('number of params:', n_parameters)
-            total_batch_size = args.batch_size * args.update_freq * utils.get_world_size()
+            total_batch_size = args.batch_size * args.update_freq * misc.get_world_size()
             num_training_steps_per_inner_epoch = len(dataset_train) // total_batch_size
             print("LR = %.8f" % args.lr)
             print("Batch size = %d" % total_batch_size)
@@ -409,7 +410,7 @@ def main(args, model):
                 log_writer.set_step(epoch)
                 
             if args.eval:
-                utils.auto_load_model(
+                misc.auto_load_model(
                     args=args, model=model, model_without_ddp=model_without_ddp,
                     optimizer=optimizer, loss_scaler=loss_scaler, model_ema=model_ema)
                 
@@ -445,7 +446,7 @@ def main(args, model):
                              'inner_epoch': inner_epoch,
                              'n_parameters': n_parameters}
                 
-                if args.output_dir and utils.is_main_process():
+                if args.output_dir and misc.is_main_process():
                     if log_writer is not None:
                         log_writer.flush()
                     with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
@@ -466,7 +467,7 @@ def main(args, model):
         # TO CHECK: global model is the same for each client?
         if args.output_dir and args.save_ckpt:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.max_communication_rounds:
-                utils.save_model(
+                misc.save_model(
                     args=args, model=model_avg, model_without_ddp=model_avg,
                     optimizer=optimizer, loss_scaler=loss_scaler, epoch=epoch)
         
@@ -478,7 +479,7 @@ def main(args, model):
             if max_accuracy < test_stats["acc1"]:
                 max_accuracy = test_stats["acc1"]
                 if args.output_dir and args.save_ckpt:
-                    utils.save_model(
+                    misc.save_model(
                         args=args, model=model_avg, 
                         model_without_ddp=model_without_ddp, optimizer=optimizer,
                         loss_scaler=loss_scaler, epoch="best", model_ema=model_ema)
@@ -493,7 +494,7 @@ def main(args, model):
                          'epoch': epoch,
                          'n_parameters': n_parameters}
             
-        if args.output_dir and utils.is_main_process():
+        if args.output_dir and misc.is_main_process():
                 if log_writer is not None:
                     log_writer.flush()
                 with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:

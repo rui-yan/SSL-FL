@@ -28,13 +28,16 @@ from timm.models.layers import trunc_normal_
 from timm.data.mixup import Mixup
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 
-import util.misc as misc
-
 import models_vit
 
 from engine_finetune import train_one_epoch, evaluate
-
 from copy import deepcopy
+
+import sys
+sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+
+import util.misc as misc
+
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
 from FedAvg_utils.data_utils import DatasetFLFinetune, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
@@ -121,7 +124,7 @@ def get_args():
                         help='Use class token instead of global pool for classification')
 
     # Dataset parameters\
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'CIFAR100', 
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'ISIC', 
                                                                 'IMNET', 'Retina', 'image_folder'],
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
@@ -192,10 +195,10 @@ def main(args, model):
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
-        dataset_val = DatasetFLBEiT(args=args, phase='val')
+        dataset_val = DatasetFLFinetune(args=args, phase='val')
     
     if args.eval:
-        dataset_test = DatasetFLBEiT(args=args, phase='test')
+        dataset_test = DatasetFLFinetune(args=args, phase='test')
     else:
         dataset_test = None
     

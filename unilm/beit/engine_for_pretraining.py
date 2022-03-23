@@ -16,8 +16,9 @@ from typing import Iterable
 import torch
 import torch.nn as nn
 
-import utils
-
+import sys
+sys.path.insert(0,'..')
+import util.misc as misc
 
 def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
@@ -30,9 +31,9 @@ def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
                     lr_scheduler=None, start_steps=None,
                     lr_schedule_values=None, wd_schedule_values=None):
     model.train()
-    metric_logger = utils.MetricLogger(delimiter="  ")
-    metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    # metric_logger.add_meter('min_lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger = misc.MetricLogger(delimiter="  ")
+    metric_logger.add_meter('lr', misc.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    # metric_logger.add_meter('min_lr', misc.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = 'Epoch: [{}]'.format(epoch)
     print_freq = 10
     

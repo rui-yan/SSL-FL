@@ -21,16 +21,18 @@ import os
 from pathlib import Path
 
 from timm.models import create_model
-# from optim_factory import create_optimizer
-
-import utils
 
 import modeling_pretrain
 from engine_for_pretraining import train_one_epoch
-
 from copy import deepcopy
+
+import sys
+sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+
+import util.misc as misc
+
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
-from FedAvg_utils.data_utils import DatasetFLBEiTPretrain, create_dataset_and_evalmetrix
+from FedAvg_utils.data_utils import DatasetFLPretrain, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
 
 def get_args():
@@ -41,6 +43,7 @@ def get_args():
     parser.add_argument("--discrete_vae_type", type=str, default="dall-e")
     
     # Model parameters
+    parser.add_argument('--model_name', default='beit', type=str)
     parser.add_argument('--model', default='deit_base_patch16_224', type=str, metavar='MODEL',
                         help='Name of model to train')
     parser.add_argument('--rel_pos_bias', action='store_true')
@@ -102,7 +105,7 @@ def get_args():
                         help='Interpolation for discrete vae (random, bilinear, bicubic default: "lanczos")')
 
     # Dataset parameters
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'CIFAR100', 
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'ISIC', 
                                                                 'IMNET', 'Retina', 'image_folder'],
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
@@ -178,7 +181,7 @@ def get_model(args):
 
 def main(args, model):
     
-    utils.init_distributed_mode(args)
+    misc.init_distributed_mode(args)
     
     print('job dir: {}'.format(os.path.dirname(os.path.realpath(__file__))))
     print("{}".format(args).replace(', ', ',\n'))
@@ -186,7 +189,7 @@ def main(args, model):
     device = torch.device(args.device)
     
     # fix the seed for reproducibility
-    utils.fix_random_seeds(args)
+    misc.fix_random_seeds(args)
     
     cudnn.benchmark = True
     
@@ -199,19 +202,17 @@ def main(args, model):
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, criterion_all, lr_scheduler_all, wd_scheduler_all, loss_scaler_all = Partial_Client_Selection(args, model)
     model_avg = deepcopy(model).cpu()
-    args.model_name = args.model.split('_')[0]
-    print('model_name: ', args.model_name)
     
     # prepare discrete vae
-    d_vae = utils.create_d_vae(
+    d_vae = misc.create_d_vae(
         weight_path=args.discrete_vae_weight_path, d_vae_type=args.discrete_vae_type,
         device=device, image_size=args.second_input_size)
     
-    global_rank = utils.get_rank()
+    global_rank = misc.get_rank()
     
     if global_rank == 0 and args.log_dir is not None:
         os.makedirs(args.log_dir, exist_ok=True)
-        log_writer = utils.TensorboardLogger(log_dir=args.log_dir)
+        log_writer = misc.TensorboardLogger(log_dir=args.log_dir)
     else:
         log_writer = None
     
@@ -248,10 +249,10 @@ def main(args, model):
             args.clients_weightes[proxy_single_client] = args.clients_with_len[cur_single_client] / cur_tot_client_Lens
             
             # ---- get dataset for each client for pretraining
-            dataset_train = DatasetFLBEiTPretrain(args)
+            dataset_train = DatasetFLPretrain(args)
             
-            num_tasks = utils.get_world_size()
-            global_rank = utils.get_rank()
+            num_tasks = misc.get_world_size()
+            global_rank = misc.get_rank()
             sampler_rank = global_rank
             num_training_steps_per_inner_epoch = len(dataset_train) // args.batch_size // num_tasks
             
@@ -333,7 +334,7 @@ def main(args, model):
                              'inner_epoch': inner_epoch,
                              'n_parameters': n_parameters}
                 
-                if args.output_dir and utils.is_main_process():
+                if args.output_dir and misc.is_main_process():
                     if log_writer is not None:
                         log_writer.flush()
                     with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
@@ -349,7 +350,7 @@ def main(args, model):
         # TO CHECK: global model is the same for each client?
         if args.output_dir:
             if (epoch + 1) % args.save_ckpt_freq == 0:
-                utils.save_model(
+                misc.save_model(
                     args=args, model=model_avg, model_without_ddp=model_avg,
                     optimizer=optimizer, loss_scaler=loss_scaler, epoch=epoch)
         

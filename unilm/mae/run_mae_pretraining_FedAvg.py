@@ -26,12 +26,16 @@ import timm
 assert timm.__version__ == "0.3.2"  # version check
 import timm.optim.optim_factory as optim_factory
 
-import util.misc as misc
-
 import models_mae
 from engine_pretrain import train_one_epoch
 
 from copy import deepcopy
+
+import sys
+sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+
+import util.misc as misc
+
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
 from FedAvg_utils.data_utils import DatasetFLPretrain, create_dataset_and_evalmetrix
 from FedAvg_utils.start_config import print_options
@@ -78,7 +82,7 @@ def get_args():
                         help='epochs to warmup LR')
 
     # Dataset parameters
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'CIFAR100', 
+    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'ISIC', 
                                                                 'IMNET', 'Retina', 'image_folder'],
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
@@ -156,7 +160,6 @@ def main(args, model):
         log_writer = None
     
     # ---------- Train! (use different clients)
-    print("=============== Running pre-training ===============")
     tot_clients = args.dis_cvs_files
     print('total_clients: ', tot_clients)
     epoch = -1

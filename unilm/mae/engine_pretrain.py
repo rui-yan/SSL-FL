@@ -14,6 +14,8 @@ from typing import Iterable
 
 import torch
 
+import sys
+sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
 import util.misc as misc
 import util.lr_sched as lr_sched
 
