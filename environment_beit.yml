@@ -137,9 +137,7 @@ dependencies:
     - tifffile==2021.11.2
     - timm==0.3.2
     - toml==0.10.2
-    - torch==1.7.1+cu110
     - torchaudio==0.7.2
-    - torchvision==0.8.2+cu110
     - tornado==6.1
     - tqdm==4.62.3
     - traitlets==5.1.0
