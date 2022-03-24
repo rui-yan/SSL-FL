@@ -38,8 +38,10 @@ RETINA_STD = (0.0342, 0.0535, 0.0484)
 COVIDX_MEAN = [0.485, 0.456, 0.406]
 COVIDX_STD = [0.229, 0.224, 0.225]
 
-ISIC_MEAN = (0.7635, 0.5461, 0.5705)
-ISIC_STD = (0.0983, 0.0857, 0.0951)
+# ISIC_MEAN = (0.7635, 0.5461, 0.5705)
+# ISIC_STD = (0.0983, 0.0857, 0.0951)
+ISIC_MEAN = (0.49139968, 0.48215827, 0.44653124)
+ISIC_STD = (0.24703233, 0.24348505, 0.26158768)
 
 class DataAugmentationForPretrain(object):
     def __init__(self, args):
@@ -53,10 +55,10 @@ class DataAugmentationForPretrain(object):
             std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
         elif args.data_set == 'Retina':
             mean, std = RETINA_MEAN, RETINA_STD
-        # elif args.data_set == 'COVIDfl':
-        #     mean, std = COVIDX_MEAN, COVIDX_STD
-        # elif args.data_set == 'ISIC':
-        #     mean, std = ISIC_MEAN, ISIC_STD
+        elif args.data_set == 'COVIDfl':
+            mean, std = COVIDX_MEAN, COVIDX_STD
+        elif args.data_set == 'ISIC':
+            mean, std = ISIC_MEAN, ISIC_STD
         else:
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
@@ -104,7 +106,7 @@ class DataAugmentationForPretrain(object):
                 self.common_transform = transforms.Compose([
                     # transforms.CenterCrop(args.input_size),
                     # transforms.RandomGrayscale(p=0.2),
-                    transforms.ColorJitter(0.4, 0.4, 0.4),
+                    transforms.ColorJitter(0.1, 0.1, 0.1),
                     transforms.RandomHorizontalFlip(p=0.5),
                     # transforms.RandomRotation(degrees=10),
                     RandomResizedCropAndInterpolationWithTwoPic(
@@ -238,10 +240,10 @@ def build_transform(is_train, args):
         std = IMAGENET_INCEPTION_STD if not imagenet_default_mean_and_std else IMAGENET_DEFAULT_STD
     elif args.data_set == 'Retina':
         mean, std = RETINA_MEAN, RETINA_STD
-    # elif args.data_set == 'COVIDfl':
-    #     mean, std = COVIDX_MEAN, COVIDX_STD
-    # elif args.data_set == 'ISIC':
-    #     mean, std = ISIC_MEAN, ISIC_STD
+    elif args.data_set == 'COVIDfl':
+        mean, std = COVIDX_MEAN, COVIDX_STD
+    elif args.data_set == 'ISIC':
+        mean, std = ISIC_MEAN, ISIC_STD
     else:
         mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
     
@@ -301,7 +303,6 @@ def build_transform(is_train, args):
                         std=torch.tensor(std))
                     ])
             elif args.data_set == 'ISIC':
-                #transforms.CenterCrop(args.input_size),
                 transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.)),
                     transforms.RandomRotation(degrees=10),
@@ -321,10 +322,5 @@ def build_transform(is_train, args):
                     std=torch.tensor(std))
                 ])
     return transform
-
-# transforms.ColorJitter(hue=.05, saturation=.05),
-# transforms.RandomHorizontalFlip(),
-# transforms.RandomRotation(15, resample=Image.BILINEAR),
-# transforms.RandomResizedCrop(image_size, scale=(0.9, 1.0)),
         
 # https://github.com/joycebyang/covidx/blob/master/pretrain/train.ipynb
