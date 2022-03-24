@@ -143,11 +143,24 @@ class DataAugmentationForPretrain(object):
         elif args.model_name == 'mae':
             # common_transform
             if args.aug == 'aug_2':
-                self.common_transform = transforms.Compose([
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-                    transforms.RandomGrayscale(p=0.2),
-                    transforms.ColorJitter(0.4, 0.4, 0.4),
-                    transforms.RandomHorizontalFlip(p=0.5)])
+                if args.data_set == 'ISIC':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+                        transforms.RandomGrayscale(p=0.2),
+                        transforms.ColorJitter(0.1, 0.1, 0.1),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+                elif args.data_set == 'COVIDfl':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.4, 1.0), interpolation=3),  # 3 is bicubic
+                        transforms.ColorJitter(hue=.05, saturation=.05),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+                elif args.data_set == 'Retina':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic   
+                        transforms.RandomGrayscale(p=0.2),
+                        transforms.ColorJitter(0.4, 0.4, 0.4),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+            
             elif args.aug == 'aug_1':
                 self.common_transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
