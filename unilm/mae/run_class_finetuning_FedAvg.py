@@ -194,7 +194,7 @@ def main(args, model):
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
-        dataset_val = DatasetFLFinetune(args=args, phase='val')
+        dataset_val = DatasetFLFinetune(args=args, phase='test')
     
     if args.eval:
         dataset_test = DatasetFLFinetune(args=args, phase='test')
