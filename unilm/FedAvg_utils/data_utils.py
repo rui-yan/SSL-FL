@@ -123,8 +123,8 @@ class DatasetFLFinetune(data.Dataset):
            #     args.single_client = os.path.join(args.data_path, 'test.csv')
            # elif self.phase == 'val':
            #     args.single_client = os.path.join(args.data_path, 'val.csv')
-            
-            args.single_client = os.path.join(args.data_path, f'{self.phase}.csv')
+            if not is_train: 
+            	args.single_client = os.path.join(args.data_path, f'{self.phase}.csv')
 
             if args.split_type == 'central':
                 cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
@@ -134,6 +134,7 @@ class DatasetFLFinetune(data.Dataset):
                 
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
+            print('hahahah test: ', args.single_client, len(self.img_paths)) 
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
                 
