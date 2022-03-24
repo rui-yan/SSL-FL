@@ -106,12 +106,12 @@ class DataAugmentationForPretrain(object):
                 self.common_transform = transforms.Compose([
                     # transforms.CenterCrop(args.input_size),
                     # transforms.RandomGrayscale(p=0.2),
-                    transforms.ColorJitter(0.1, 0.1, 0.1),
+                    transforms.ColorJitter(0.3, 0.3, 0.3, 0.1),
                     transforms.RandomHorizontalFlip(p=0.5),
                     # transforms.RandomRotation(degrees=10),
                     RandomResizedCropAndInterpolationWithTwoPic(
                         size=args.input_size, second_size=args.second_input_size,
-                        scale=(0.2, 1.0),
+                        scale=(0.6, 1.2),
                         interpolation=args.train_interpolation,
                         second_interpolation=args.second_interpolation,
                     ),
@@ -159,6 +159,12 @@ class DataAugmentationForPretrain(object):
                         transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic   
                         transforms.RandomGrayscale(p=0.2),
                         transforms.ColorJitter(0.4, 0.4, 0.4),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+            elif args.aug == 'aug_3':
+                if args.data_set == 'ISIC':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.2), interpolation=3),  # 3 is bicubic
+                        transforms.ColorJitter(0.3, 0.3, 0.3, 0.1),
                         transforms.RandomHorizontalFlip(p=0.5)])
             
             elif args.aug == 'aug_1':
