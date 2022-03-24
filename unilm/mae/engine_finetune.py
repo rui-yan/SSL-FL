@@ -19,7 +19,7 @@ from timm.data import Mixup
 from timm.utils import accuracy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+sys.path.insert(1, '/home/cihangxie/yan/SSL-FL/unilm/')
 import util.misc as misc
 import util.lr_sched as lr_sched
 

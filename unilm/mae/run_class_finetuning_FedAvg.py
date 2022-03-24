@@ -34,7 +34,7 @@ from engine_finetune import train_one_epoch, evaluate
 from copy import deepcopy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+sys.path.insert(1, '/home/cihangxie/yan/SSL-FL/unilm/')
 
 import util.misc as misc
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
@@ -194,7 +194,7 @@ def main(args, model):
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
-        dataset_val = DatasetFLFinetune(args=args, phase='val')
+        dataset_val = DatasetFLFinetune(args=args, phase='test')
     
     if args.eval:
         dataset_test = DatasetFLFinetune(args=args, phase='test')
