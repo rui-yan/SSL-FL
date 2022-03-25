@@ -63,8 +63,7 @@ class DataAugmentationForPretrain(object):
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
         if args.model_name == 'beit':
-            # common_transform
-            if args.data_set == 'CIFAR10':
+            if args.aug == 'aug_1':
                 self.common_transform = transforms.Compose([
                     transforms.ColorJitter(0.4, 0.4, 0.4),
                     transforms.RandomHorizontalFlip(p=0.5),
@@ -74,48 +73,57 @@ class DataAugmentationForPretrain(object):
                         second_interpolation=args.second_interpolation,
                     ),
                 ])
-            elif args.data_set == 'Retina':
-                '''https://github.com/xmengli/self_supervised/blob/master/main.py'''
-                self.common_transform = transforms.Compose([
-                    transforms.RandomGrayscale(p=0.2),
-                    transforms.ColorJitter(0.4, 0.4, 0.4),
-                    transforms.RandomHorizontalFlip(p=0.5),
-                    # transforms.RandomRotation(degrees=10),
-                    RandomResizedCropAndInterpolationWithTwoPic(
-                        size=args.input_size, second_size=args.second_input_size,
-                        scale=(0.2, 1.0),
-                        interpolation=args.train_interpolation,
-                        second_interpolation=args.second_interpolation,
-                    ),
-                ])
-            elif args.data_set == 'COVIDfl':
-                self.common_transform = transforms.Compose([
-                    # transforms.CenterCrop(args.input_size),
-                    # transforms.ColorJitter(0.4, 0.4, 0.4),
-                    transforms.ColorJitter(hue=.05, saturation=.05),
-                    transforms.RandomHorizontalFlip(p=0.5),
-                    # transforms.RandomRotation(10),
-                    RandomResizedCropAndInterpolationWithTwoPic(
-                        size=args.input_size, second_size=args.second_input_size,
-                        scale=(0.4, 1.0),
-                        interpolation=args.train_interpolation,
-                        second_interpolation=args.second_interpolation,
-                    ),
-                ])
-            elif args.data_set == 'ISIC':
-                self.common_transform = transforms.Compose([
-                    # transforms.CenterCrop(args.input_size),
-                    # transforms.RandomGrayscale(p=0.2),
-                    transforms.ColorJitter(0.3, 0.3, 0.3, 0.1),
-                    transforms.RandomHorizontalFlip(p=0.5),
-                    # transforms.RandomRotation(degrees=10),
-                    RandomResizedCropAndInterpolationWithTwoPic(
-                        size=args.input_size, second_size=args.second_input_size,
-                        scale=(0.6, 1.2),
-                        interpolation=args.train_interpolation,
-                        second_interpolation=args.second_interpolation,
-                    ),
-                ])
+            elif args.aug == 'aug_2':
+                if args.data_set == 'Retina':
+                    '''https://github.com/xmengli/self_supervised/blob/master/main.py'''
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomGrayscale(p=0.2),
+                        transforms.ColorJitter(0.4, 0.4, 0.4),
+                        transforms.RandomHorizontalFlip(p=0.5),
+                        RandomResizedCropAndInterpolationWithTwoPic(
+                            size=args.input_size, second_size=args.second_input_size,
+                            scale=(0.2, 1.0),
+                            interpolation=args.train_interpolation,
+                            second_interpolation=args.second_interpolation,
+                        ),
+                    ])
+                elif args.data_set == 'COVIDfl':
+                    self.common_transform = transforms.Compose([
+                        transforms.ColorJitter(hue=.05, saturation=.05),
+                        transforms.RandomHorizontalFlip(p=0.5),
+                        RandomResizedCropAndInterpolationWithTwoPic(
+                            size=args.input_size, second_size=args.second_input_size,
+                            scale=(0.4, 1.0),
+                            interpolation=args.train_interpolation,
+                            second_interpolation=args.second_interpolation,
+                        ),
+                    ])
+                elif args.data_set == 'ISIC':
+                    self.common_transform = transforms.Compose([
+                        transforms.ColorJitter(0.4, 0.4, 0.4),
+                        transforms.RandomHorizontalFlip(p=0.5),
+                        RandomResizedCropAndInterpolationWithTwoPic(
+                            size=args.input_size, second_size=args.second_input_size,
+                            scale=(0.2, 1.0),
+                            interpolation=args.train_interpolation,
+                            second_interpolation=args.second_interpolation,
+                        ),
+                    ])
+                    
+            elif args.aug == 'aug_3':
+                if args.data_set == 'ISIC':
+                    self.common_transform = transforms.Compose([
+                        transforms.ColorJitter(0.3, 0.3, 0.3, 0.1),
+                        transforms.RandomHorizontalFlip(p=0.5),
+                        RandomResizedCropAndInterpolationWithTwoPic(
+                            size=args.input_size, second_size=args.second_input_size,
+                            scale=(0.6, 1.2),
+                            interpolation=args.train_interpolation,
+                            second_interpolation=args.second_interpolation,
+                        ),
+                    ])
+                else:
+                    print(f'{args.data_set} does not have {args.aug}')
             
             # visual_token_transform
             if args.discrete_vae_type == "dall-e":
@@ -141,36 +149,40 @@ class DataAugmentationForPretrain(object):
             )
         
         elif args.model_name == 'mae':
-            # common_transform
-            if args.aug == 'aug_2':
-                if args.data_set == 'ISIC':
-                    self.common_transform = transforms.Compose([
-                        transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-                        transforms.RandomGrayscale(p=0.2),
-                        transforms.ColorJitter(0.1, 0.1, 0.1),
-                        transforms.RandomHorizontalFlip(p=0.5)])
-                elif args.data_set == 'COVIDfl':
-                    self.common_transform = transforms.Compose([
-                        transforms.RandomResizedCrop(args.input_size, scale=(0.4, 1.0), interpolation=3),  # 3 is bicubic
-                        transforms.ColorJitter(hue=.05, saturation=.05),
-                        transforms.RandomHorizontalFlip(p=0.5)])
-                elif args.data_set == 'Retina':
+            if args.aug == 'aug_1':
+                self.common_transform = transforms.Compose([
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+                    transforms.RandomHorizontalFlip(p=0.5)])
+            
+            elif args.aug == 'aug_2':
+                if args.data_set == 'Retina':
                     self.common_transform = transforms.Compose([
                         transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic   
                         transforms.RandomGrayscale(p=0.2),
                         transforms.ColorJitter(0.4, 0.4, 0.4),
                         transforms.RandomHorizontalFlip(p=0.5)])
+                    
+                elif args.data_set == 'COVIDfl':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.4, 1.0), interpolation=3),  # 3 is bicubic
+                        transforms.ColorJitter(hue=.05, saturation=.05),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+            
+                elif args.data_set == 'ISIC':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+                        transforms.RandomGrayscale(p=0.2),
+                        transforms.ColorJitter(0.1, 0.1, 0.1),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+            
             elif args.aug == 'aug_3':
                 if args.data_set == 'ISIC':
                     self.common_transform = transforms.Compose([
                         transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.2), interpolation=3),  # 3 is bicubic
                         transforms.ColorJitter(0.3, 0.3, 0.3, 0.1),
                         transforms.RandomHorizontalFlip(p=0.5)])
-            
-            elif args.aug == 'aug_1':
-                self.common_transform = transforms.Compose([
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-                    transforms.RandomHorizontalFlip(p=0.5)])
+                else:
+                    print(f'{args.data_set} does not have {args.aug}')
         
         self.patch_transform = transforms.Compose([
             transforms.ToTensor(),
