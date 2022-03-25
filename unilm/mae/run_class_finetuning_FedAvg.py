@@ -34,7 +34,7 @@ from engine_finetune import train_one_epoch, evaluate
 from copy import deepcopy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+sys.path.insert(1, '/home/cihangxie/yan/SSL-FL/unilm/')
 
 import util.misc as misc
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model

@@ -32,7 +32,7 @@ from engine_pretrain import train_one_epoch
 from copy import deepcopy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/unilm/')
+sys.path.insert(1, '/home/cihangxie/yan/SSL-FL/unilm/')
 
 import util.misc as misc
 from FedAvg_utils.util import Partial_Client_Selection, valid, average_model
@@ -86,7 +86,7 @@ def get_args():
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
-    parser.add_argument('--aug', default='aug_2', choices=['aug_1', 'aug_2'], type=str)
+    parser.add_argument('--aug', default='aug_2', type=str)
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
     parser.add_argument('--log_dir', default=None,
