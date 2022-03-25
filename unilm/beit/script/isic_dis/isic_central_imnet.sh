@@ -2,26 +2,27 @@
 
 MODEL_NAME='beit'
 
-cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
+cd /home/cihangxie/yan/SSL-FL/unilm/${MODEL_NAME}/
 
 DATASET='ISIC'
 SPLIT_TYPE='central'
-N_CLASSES=7
-DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
+N_CLASSES=2
+DATA_PATH="/data1/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
-MASK_RATIO=0.4
 
 # ------------------ finetune ----------------- #
+CKPT_PATH='/data1/data/yan/SSL-FL/beit_ckpt/beit_base_patch16_224_pt22k.pth'
+
 FT_EPOCHS=100
 FT_LR='3e-3'
-FT_BATCH_SIZE=64
+FT_BATCH_SIZE=32
 
-OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/imnet_pretrained_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis4"
+OUTPUT_PATH_FT="/data1/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/imnet_pretrained_${MODEL_NAME}_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis8"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_class_finetuning_FedAvg_distributed.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=8 run_class_finetuning_FedAvg_distributed.py \
      --data_path ${DATA_PATH} \
      --data_set ${DATASET} \
-     --finetune https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth \
+     --finetune ${CKPT_PATH} \
      --nb_classes ${N_CLASSES} \
      --output_dir ${OUTPUT_PATH_FT} \
      --lr ${FT_LR} \
