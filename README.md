@@ -20,9 +20,9 @@ Step5: ```./gdrive list```
 
 ```gdown https://drive.google.com/uc?id=```
 
-- CIFAR10: [download link](https://drive.google.com/file/d/1elgSFsfDI3Tfdf3BZ44lxBs2BaJ4lf5_/view?usp=sharing)
 - Retina: [download link](https://drive.google.com/file/d/10l2A5dW5pdU6dXAjmP-o_dVgEduhsoT2/view?usp=sharing)
-- COVIDx: [download link](https://drive.google.com/file/d/1zOHaHVqgTMk_25fciTojq7ZIurpWIFSb/view?usp=sharing)
+- COVIDx: [download link](https://drive.google.com/file/d/1JQddPJi0alLBsK_o-3-Z5uUVCETWhoM0/view?usp=sharing)
+- ISIC: [download link](https://drive.google.com/file/d/1Lf9yDHgbRsBF0stSjOuRaDJ1_8U-g7bP/view?usp=sharing)
 
 ## BEiT
 ### IMNET Pretrained models
