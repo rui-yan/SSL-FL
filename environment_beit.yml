@@ -35,16 +35,19 @@ dependencies:
     - cachetools==4.2.4
     - cffi==1.15.0
     - charset-normalizer==2.0.7
+    - cmasher==1.6.3
+    - colorspacious==1.1.2
     - cycler==0.10.0
     - debugpy==1.5.0
     - decorator==5.1.0
     - defusedxml==0.7.1
+    - e13tools==0.9.6
     - einops==0.3.2
     - entrypoints==0.3
     - et-xmlfile==1.1.0
     - filelock==3.3.0
     - future==0.18.2
-    - gdown==4.2.0
+    - gdown==4.4.0
     - google-auth==2.3.3
     - google-auth-oauthlib==0.4.6
     - grpcio==1.43.0
@@ -57,6 +60,7 @@ dependencies:
     - ipython-genutils==0.2.0
     - jedi==0.18.0
     - jinja2==3.0.2
+    - joblib==1.1.0
     - json5==0.9.6
     - jsonschema==4.1.0
     - jupyter-client==7.0.6
@@ -87,12 +91,13 @@ dependencies:
     - opencv-python==4.5.5.62
     - openpyxl==3.0.9
     - packaging==21.0
-    - pandas==1.3.5
+    - pandas==1.4.2
     - pandocfilters==1.5.0
     - parso==0.8.2
     - pexpect==4.8.0
     - pickleshare==0.7.5
     - pillow==8.3.2
+    - plotly==5.7.0
     - pluggy==1.0.0
     - prometheus-client==0.11.0
     - prompt-toolkit==3.0.20
@@ -121,12 +126,15 @@ dependencies:
     - requests-unixsocket==0.2.0
     - rsa==4.8
     - scikit-image==0.19.1
+    - scikit-learn==1.0.2
     - scipy==1.7.1
     - seaborn==0.11.2
     - send2trash==1.8.0
     - six==1.16.0
+    - sklearn==0.0
     - sniffio==1.2.0
     - soupsieve==2.3.1
+    - tenacity==8.0.1
     - tensorboard==2.7.0
     - tensorboard-data-server==0.6.1
     - tensorboard-plugin-wit==1.8.1
@@ -134,10 +142,13 @@ dependencies:
     - terminado==0.12.1
     - testpath==0.5.0
     - text-unidecode==1.3
+    - threadpoolctl==3.1.0
     - tifffile==2021.11.2
     - timm==0.3.2
     - toml==0.10.2
+    - torch==1.7.1+cu110
     - torchaudio==0.7.2
+    - torchvision==0.8.2+cu110
     - tornado==6.1
     - tqdm==4.62.3
     - traitlets==5.1.0

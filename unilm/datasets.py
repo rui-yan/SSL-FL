@@ -326,7 +326,7 @@ def build_transform(is_train, args):
                 transform = transforms.Compose([
                     # transforms.CenterCrop(args.input_size),
                     transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
-                    transforms.RandomRotation(degrees=20),
+                    transforms.RandomRotation(degrees=10),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(), 
                     transforms.Normalize(
@@ -353,5 +353,3 @@ def build_transform(is_train, args):
                     std=torch.tensor(std))
                 ])
     return transform
-        
-# https://github.com/joycebyang/covidx/blob/master/pretrain/train.ipynb

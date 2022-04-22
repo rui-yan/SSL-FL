@@ -134,7 +134,6 @@ class DatasetFLFinetune(data.Dataset):
                 
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
-            print('hahahah test: ', args.single_client, len(self.img_paths)) 
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
                 
