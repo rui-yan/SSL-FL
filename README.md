@@ -28,12 +28,12 @@ Step5: ```./gdrive list```
 If you want to test on new datasets, please modify unilm/datasets.py and FedAvg_utils/data_utils.py
 
 ## Self-supervised Federated Pre-training
-Fed-BEiT: ```unilm/beit/run_beit_pretraining_FedAvg_distributed.py```
-Fed-MAE: ```unilm/mae/run_mae_pretraining_FedAvg.py```
+- Fed-BEiT: ```unilm/beit/run_beit_pretraining_FedAvg_distributed.py```
+- Fed-MAE: ```unilm/mae/run_mae_pretraining_FedAvg.py```
 
 ## Self-supervised Federated Fine-tuning
-Fed-BEiT: ```unilm/beit/run_class_finetuning_FedAvg_distributed.py```
-Fed-MAE: ```unilm/mae/run_class_finetuning_FedAvg.py```
+- Fed-BEiT: ```unilm/beit/run_class_finetuning_FedAvg_distributed.py```
+- Fed-MAE: ```unilm/mae/run_class_finetuning_FedAvg.py```
 
 Scripts for BEiT and MAE and in unilm/beit/script and unilm/mae/script.
 
