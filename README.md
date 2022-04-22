@@ -5,7 +5,7 @@
 - then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
 
 ## Datasets and simulated data splits
-### Download gdrive for file uploading
+### Download gdrive for file uploading (optional)
 Step1: ```wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz```
 
 Step2: ```tar -xvf gdrive_2.1.1_linux_386.tar.gz```
