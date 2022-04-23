@@ -219,6 +219,56 @@ class DataAugmentationForPretrain(object):
         
         return repr
 
+class PEDataset2D(PEDatasetBase):
+    def __init__(self, is_train=True, transform=None):
+        super().__init__(cfg, split)
+
+	CSV_PATH = '/home/mschuang/SSL-FL/ssl_fl_pe.csv'
+        self.df = pd.read_csv(CSV_PATH)
+        self.transform = transform
+
+    def __getitem__(self, index):
+
+        # get slice row
+        instance_info = self.df.iloc[index]
+
+	# get ct 
+	ct_slice = np.load(instance_info['path'])
+        ct_slice = self.windowing(ct_slice, 400, 1000)
+
+        # transform
+        if ct_slice.shape[0] == 3:
+            ct_slice = np.transpose(ct_slice, (1,2,0))
+        else: 
+            ct_slice = np.expand_dims(ct_slice, -1)
+
+	if self.transform is not None:
+	    x = self.transform(ct_slice)
+
+	# check dimention
+	if x.shape[0] == 1:  # for repeat
+	    c, w, h = list(x.shape)
+	    x = x.expand(3, w, h) 
+	x = x.type(torch.FloatTensor)
+
+        # get labels
+        y = instance_info['label'].astype(float)
+        y = torch.tensor(y)
+
+        return x, y
+
+    def __len__(self):
+        return len(self.df)
+
+    def windowing(self, pixel_array: np.array, window_center: int, window_width: int):
+
+        lower = window_center - window_width // 2
+        upper = window_center + window_width // 2
+        pixel_array = np.clip(pixel_array.copy(), lower, upper)
+        pixel_array = (pixel_array - lower) / (upper - lower)
+
+        return pixel_array
+
     
 def build_dataset(is_train, args):
     transform = build_transform(is_train, args)
@@ -251,6 +301,9 @@ def build_dataset(is_train, args):
         dataset = ImageFolder(root, transform=transform)
         nb_classes = args.nb_classes
         assert len(dataset.class_to_idx) == nb_classes
+    elif args.data_set == "PE":
+        dataset = PEDataset()
+        nb_classes = 1 
     else:
         raise NotImplementedError()
     assert nb_classes == args.nb_classes
