@@ -259,7 +259,7 @@ def build_dataset(is_train, args):
     return dataset, nb_classes
 
 
-def build_transform(is_train, args):
+def build_transform(is_train, mode, args):
     resize_im = args.input_size > 32
     
     if args.data_set == 'CIFAR10':
@@ -278,78 +278,93 @@ def build_transform(is_train, args):
     else:
         mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
     
-    if args.data_set == 'CIFAR10':
-        if is_train:
-            # this should always dispatch to transforms_imagenet_train
-            transform = create_transform(
-                input_size=args.input_size,
-                is_training=True,
-                color_jitter=args.color_jitter,
-                auto_augment=args.aa,
-                interpolation=args.train_interpolation,
-                re_prob=args.reprob,
-                re_mode=args.remode,
-                re_count=args.recount,
-                mean=mean,
-                std=std,
-            )
-            if not resize_im:
-                # replace RandomResizedCropAndInterpolation with
-                # RandomCrop
-                transform.transforms[0] = transforms.RandomCrop(
-                    args.input_size, padding=4)
+    if mode == 'finetune':
+        if args.data_set == 'CIFAR10':
+            if is_train:
+                # this should always dispatch to transforms_imagenet_train
+                transform = create_transform(
+                    input_size=args.input_size,
+                    is_training=True,
+                    color_jitter=args.color_jitter,
+                    auto_augment=args.aa,
+                    interpolation=args.train_interpolation,
+                    re_prob=args.reprob,
+                    re_mode=args.remode,
+                    re_count=args.recount,
+                    mean=mean,
+                    std=std,
+                )
+                if not resize_im:
+                    # replace RandomResizedCropAndInterpolation with
+                    # RandomCrop
+                    transform.transforms[0] = transforms.RandomCrop(
+                        args.input_size, padding=4)
 
-        else:
-            t = []
-            size = int((256 / 224) * 224)
-            t.append(
-                transforms.Resize(size, interpolation=3),  # to maintain same ratio w.r.t. 224 images
-            )
-            t.append(transforms.CenterCrop(args.input_size))
-            t.append(transforms.ToTensor())
-            t.append(transforms.Normalize(mean, std))
-            transform = transforms.Compose(t)
+            else:
+                t = []
+                size = int((256 / 224) * 224)
+                t.append(
+                    transforms.Resize(size, interpolation=3),  # to maintain same ratio w.r.t. 224 images
+                )
+                t.append(transforms.CenterCrop(args.input_size))
+                t.append(transforms.ToTensor())
+                t.append(transforms.Normalize(mean, std))
+                transform = transforms.Compose(t)
             
-    else:
-        if is_train:
-            if args.data_set == 'Retina':
+        else:
+            if is_train:
+                if args.data_set == 'Retina':
+                    transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.)),
+                        transforms.RandomRotation(degrees=10),
+                        transforms.RandomHorizontalFlip(),
+                        transforms.ToTensor(), 
+                        transforms.Normalize(
+                            mean=torch.tensor(mean),
+                            std=torch.tensor(std))
+                        ])
+                elif args.data_set == 'COVIDfl':
+                    transform = transforms.Compose([
+                        # transforms.CenterCrop(args.input_size),
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
+                        transforms.RandomRotation(degrees=10),
+                        transforms.RandomHorizontalFlip(),
+                        transforms.ToTensor(), 
+                        transforms.Normalize(
+                            mean=torch.tensor(mean),
+                            std=torch.tensor(std))
+                        ])
+                elif args.data_set == 'ISIC':
+                    transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.)),
+                        transforms.RandomRotation(degrees=10),
+                        transforms.RandomHorizontalFlip(),
+                        transforms.ToTensor(),
+                        transforms.Normalize(
+                            mean=torch.tensor(mean),
+                            std=torch.tensor(std))
+                        ])
+                        
+            else:
                 transform = transforms.Compose([
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.)),
-                    transforms.RandomRotation(degrees=10),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(), 
-                    transforms.Normalize(
-                        mean=torch.tensor(mean),
-                        std=torch.tensor(std))
-                    ])
-            elif args.data_set == 'COVIDfl':
-                transform = transforms.Compose([
-                    # transforms.CenterCrop(args.input_size),
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
-                    transforms.RandomRotation(degrees=10),
-                    transforms.RandomHorizontalFlip(),
-                    transforms.ToTensor(), 
-                    transforms.Normalize(
-                        mean=torch.tensor(mean),
-                        std=torch.tensor(std))
-                    ])
-            elif args.data_set == 'ISIC':
-                transform = transforms.Compose([
-                    transforms.RandomResizedCrop(args.input_size, scale=(0.6, 1.)),
-                    transforms.RandomRotation(degrees=10),
-                    transforms.RandomHorizontalFlip(),
+                    transforms.Resize([args.input_size, args.input_size]),
                     transforms.ToTensor(),
                     transforms.Normalize(
                         mean=torch.tensor(mean),
                         std=torch.tensor(std))
                     ])
-                        
+    elif mode == 'linprob':
+        if is_train:
+            transform = transforms.Compose([
+                RandomResizedCrop(224, interpolation=3),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
         else:
             transform = transforms.Compose([
-                transforms.Resize([args.input_size, args.input_size]),
+                transforms.Resize(256, interpolation=3),
+                transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=torch.tensor(mean),
-                    std=torch.tensor(std))
-                ])
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+
     return transform

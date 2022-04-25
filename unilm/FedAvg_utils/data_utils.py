@@ -98,7 +98,7 @@ class DatasetFLPretrain(data.Dataset):
 
 
 class DatasetFLFinetune(data.Dataset):
-    def __init__(self, args, phase):
+    def __init__(self, args, phase, mode='finetune'):
         super(DatasetFLFinetune, self).__init__()
         self.phase = phase        
         is_train = (phase == 'train')
@@ -136,8 +136,9 @@ class DatasetFLFinetune(data.Dataset):
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
-                
-        self.transform = build_transform(is_train, args)
+        
+        self.transform = build_transform(is_train, mode, args)
+        
         self.args = args
     
     def __getitem__(self, index):

@@ -8,6 +8,7 @@ import torch.nn as nn
 import sys
 sys.path.insert(0,'..')
 
+from util.lars import LARS
 import util.misc as misc
 import util.lr_decay as lrd
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
@@ -196,7 +197,7 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
     args.t_total = {}
     
     # Load pretrained model if mode='finetune'
-    if mode=='finetune' and args.finetune:
+    if (mode=='finetune' or mode=='linprob') and args.finetune:
         if args.finetune.startswith('https'):
             checkpoint = torch.hub.load_state_dict_from_url(
                 args.finetune, map_location='cpu', check_hash=True)
@@ -258,13 +259,25 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
                 assert set(msg.missing_keys) == {'head.weight', 'head.bias'}
         
         # manually initialize fc layer
-        trunc_normal_(model.head.weight, std=2e-5)
-    
+        if mode=='finetune':    
+            trunc_normal_(model.head.weight, std=2e-5)
+        elif mode=='linprob':
+            trunc_normal_(model.head.weight, std=0.01)
+            
+            # for linear prob only
+            # hack: revise model's head with BN
+            model.head = torch.nn.Sequential(torch.nn.BatchNorm1d(model.head.in_features, affine=False, eps=1e-6), model.head)
+            # freeze all but the head
+            for _, p in model.named_parameters():
+                p.requires_grad = False
+            for _, p in model.head.named_parameters():
+                p.requires_grad = True
+
     if args.distributed:
         if args.sync_bn:
             "activate synchronized batch norm"
             model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
-    
+            
     for proxy_single_client in args.proxy_clients:
         
         global_rank = misc.get_rank()
@@ -334,7 +347,13 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
                     layer_decay=args.layer_decay
                     )
                 optimizer_all[proxy_single_client] = torch.optim.AdamW(param_groups, lr=args.lr)
-        
+        elif mode == 'linprob':
+            if args.model_name == 'beit':
+                #TODO
+                pass
+            elif args.model_name == 'mae':
+                optimizer_all[proxy_single_client] = LARS(model_without_ddp.head.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
         # criterion_all
         if mode == 'pretrain' and args.model_name == 'beit':
             criterion_all[proxy_single_client] = nn.CrossEntropyLoss()
@@ -358,7 +377,10 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
             else:
                 criterion = torch.nn.CrossEntropyLoss()
             criterion_all[proxy_single_client] = criterion
-    
+        
+        if mode == 'linprob':
+            criterion_all[proxy_single_client] = torch.nn.CrossEntropyLoss()
+
         if args.model_name == 'beit':
             # lr_scheduler_all
             print("Use step level LR & WD scheduler!")
