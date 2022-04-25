@@ -124,7 +124,7 @@ def get_args():
 
     # Dataset parameters\
     parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'ISIC', 
-                                                                'IMNET', 'Retina', 'image_folder'],
+                                                                'IMNET', 'Retina', 'image_folder', 'PE'],
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')

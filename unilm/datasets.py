@@ -59,6 +59,8 @@ class DataAugmentationForPretrain(object):
             mean, std = COVIDX_MEAN, COVIDX_STD
         elif args.data_set == 'ISIC':
             mean, std = ISIC_MEAN, ISIC_STD
+        elif args.data_set == 'PE':
+            mean, std = (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)
         else:
             mean, std = (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)
         
@@ -105,6 +107,16 @@ class DataAugmentationForPretrain(object):
                         RandomResizedCropAndInterpolationWithTwoPic(
                             size=args.input_size, second_size=args.second_input_size,
                             scale=(0.2, 1.0),
+                            interpolation=args.train_interpolation,
+                            second_interpolation=args.second_interpolation,
+                        ),
+                    ])
+                elif args.data_set == 'PE':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomHorizontalFlip(p=0.5),
+                        RandomResizedCropAndInterpolationWithTwoPic(
+                            size=args.input_size, second_size=args.second_input_size,
+                            scale=(0.4, 1.0),
                             interpolation=args.train_interpolation,
                             second_interpolation=args.second_interpolation,
                         ),
@@ -173,6 +185,11 @@ class DataAugmentationForPretrain(object):
                         transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
                         transforms.RandomGrayscale(p=0.2),
                         transforms.ColorJitter(0.1, 0.1, 0.1),
+                        transforms.RandomHorizontalFlip(p=0.5)])
+                elif args.data_set == 'PE':
+                    self.common_transform = transforms.Compose([
+                        transforms.RandomResizedCrop(args.input_size, scale=(0.4, 1.0), interpolation=3),  # 3 is bicubic
+                        transforms.RandomGrayscale(p=0.2),
                         transforms.RandomHorizontalFlip(p=0.5)])
             
             elif args.aug == 'aug_3':
@@ -301,9 +318,6 @@ def build_dataset(is_train, args):
         dataset = ImageFolder(root, transform=transform)
         nb_classes = args.nb_classes
         assert len(dataset.class_to_idx) == nb_classes
-    elif args.data_set == "PE":
-        dataset = PEDataset()
-        nb_classes = 1 
     else:
         raise NotImplementedError()
     assert nb_classes == args.nb_classes
@@ -397,6 +411,16 @@ def build_transform(is_train, args):
                         std=torch.tensor(std))
                     ])
                         
+            elif args.data_set == 'PE':
+                transform = transforms.Compose([
+                    transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
+                    transforms.RandomRotation(degrees=10),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=torch.tensor([0.0, 0.0, 0.0]),
+                        std=torch.tensor([1.0, 1.0, 1.0]))
+                    ])
         else:
             transform = transforms.Compose([
                 transforms.Resize([args.input_size, args.input_size]),
