@@ -132,3 +132,5 @@ Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
 - Fed-MAE: ```mae/run_class_finetune_FedAvg.py```
 
 Scripts for BEiT and MAE and in beit/script and mae/script.
+
+This repository is based on https://github.com/microsoft/unilm/tree/master/beit and https://github.com/facebookresearch/mae.
