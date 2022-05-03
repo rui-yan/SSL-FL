@@ -1,7 +1,7 @@
 # SSL-FL
 
 ## Set up environment
-- ```conda env create -f environment_beit.yml```
+- ```conda env create -f environment.yml```
 - then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
 
 ## Datasets and simulated data splits
@@ -46,8 +46,8 @@ Step4: ```./gdrive upload /home/documents/file_name.zip```
 Step5: ```./gdrive list```
 
 ## Self-supervised Federated Pre-training
-- Fed-BEiT: ```unilm/beit/run_beit_pretraining_FedAvg_distributed.py```
-- Fed-MAE: ```unilm/mae/run_mae_pretraining_FedAvg.py```
+- Fed-BEiT: ```unilm/beit/run_beit_pretrain_FedAvg.py```
+- Fed-MAE: ```unilm/mae/run_mae_pretrain_FedAvg.py```
 ### Fine-tuning with pre-trained checkpoints
 The following table provides the pre-trained checkpoints used in the paper:
 ### Fed-BEiT Retina
@@ -128,7 +128,7 @@ Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
 
 
 ## Self-supervised Federated Fine-tuning
-- Fed-BEiT: ```unilm/beit/run_class_finetuning_FedAvg_distributed.py```
-- Fed-MAE: ```unilm/mae/run_class_finetuning_FedAvg.py```
+- Fed-BEiT: ```unilm/beit/run_class_finetune_FedAvg.py```
+- Fed-MAE: ```unilm/mae/run_class_finetune_FedAvg.py```
 
 Scripts for BEiT and MAE and in unilm/beit/script and unilm/mae/script.
