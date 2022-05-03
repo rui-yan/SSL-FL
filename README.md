@@ -46,8 +46,8 @@ Step4: ```./gdrive upload /home/documents/file_name.zip```
 Step5: ```./gdrive list```
 
 ## Self-supervised Federated Pre-training
-- Fed-BEiT: ```unilm/beit/run_beit_pretrain_FedAvg.py```
-- Fed-MAE: ```unilm/mae/run_mae_pretrain_FedAvg.py```
+- Fed-BEiT: ```beit/run_beit_pretrain_FedAvg.py```
+- Fed-MAE: ```mae/run_mae_pretrain_FedAvg.py```
 ### Fine-tuning with pre-trained checkpoints
 The following table provides the pre-trained checkpoints used in the paper:
 ### Fed-BEiT Retina
@@ -128,7 +128,7 @@ Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
 
 
 ## Self-supervised Federated Fine-tuning
-- Fed-BEiT: ```unilm/beit/run_class_finetune_FedAvg.py```
-- Fed-MAE: ```unilm/mae/run_class_finetune_FedAvg.py```
+- Fed-BEiT: ```beit/run_class_finetune_FedAvg.py```
+- Fed-MAE: ```mae/run_class_finetune_FedAvg.py```
 
 Scripts for BEiT and MAE and in unilm/beit/script and unilm/mae/script.
