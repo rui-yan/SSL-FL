@@ -125,8 +125,8 @@ Download BEiT weights pre-trained on ImageNet-22k:
 - ```wget https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth```
 
 Download Dall-e tokenizers: 
-- ```wget -o $TOKENIZER_PATH/encoder.pkl https://cdn.openai.com/dall-e/encoder.pkl```
-- ```wget -o $TOKENIZER_PATH/decoder.pkl https://cdn.openai.com/dall-e/decoder.pkl```
+- ```wget https://cdn.openai.com/dall-e/encoder.pkl```
+- ```wget https://cdn.openai.com/dall-e/decoder.pkl```
 
 **MAE ImageNet: **
 Download MAE weights pretrained on ImageNet-22k:
