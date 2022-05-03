@@ -50,6 +50,7 @@ The following table provides the pre-trained checkpoints used in the paper:
 <td align="center"><a href="https://drive.google.com/file/d/1TPgoyqYK2ZBn4GmOdXX5AlDe8CrgWpx-/view?usp=sharing">download</a></td>
 </tr>
 </tbody></table>
+
 ### MAE Retina
 <table><tbody>
 <!-- START TABLE -->
@@ -65,6 +66,34 @@ The following table provides the pre-trained checkpoints used in the paper:
 <td align="center"><a href="https://drive.google.com/file/d/18cG2rrweNKc8LS5LBTcUAt9A4om3YWGz/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1Rdfm_o5CFWucLKckiOYbBr9UfEfcPaOu/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1StZmgbxP0VWNane3K0R8jb8sVm2Xm3H4/view?usp=sharing">download</a></td>
+</tr>
+</tbody></table>
+
+### BEiT COVID-FL
+<table><tbody>
+<!-- START TABLE -->
+<!-- TABLE HEADER -->
+<th valign="bottom"></th>
+<th valign="bottom">Central</th>
+<th valign="bottom">Real-world Split/th>
+<!-- TABLE BODY -->
+<tr><td align="left">pre-trained checkpoint</td>
+<td align="center"><a href="https://drive.google.com/file/d/1WI9TnIudIUmIfC6t3OyjPSR0T0LVlg7G/view?usp=sharing">download</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1B7fcORHeUB2rKTUu0vlTXqrcOc-XVub-/view?usp=sharing">download</a></td>
+</tr>
+</tbody></table>
+
+### MAE COVID-FL
+<table><tbody>
+<!-- START TABLE -->
+<!-- TABLE HEADER -->
+<th valign="bottom"></th>
+<th valign="bottom">Central</th>
+<th valign="bottom">Real-world Split/th>
+<!-- TABLE BODY -->
+<tr><td align="left">pre-trained checkpoint</td>
+<td align="center"><a href="https://drive.google.com/file/d/1Ma55OepDzjcGHRYHVg4GahCxH9OY16gm/view?usp=sharing">download</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/16FIte4hkp5I9MUztEcgmAA2F02_2Zr1S/view?usp=sharing">download</a></td>
 </tr>
 </tbody></table>
 
