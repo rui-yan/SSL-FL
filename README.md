@@ -135,3 +135,4 @@ Scripts are in beit/script and mae/script.
 
 ## Acknowledgements
 * This repository is based on [BEiT](https://github.com/microsoft/unilm/tree/master/beit) and [MAE](https://github.com/facebookresearch/mae).
+* The main FL setup is based on prior work ["Rethinking Architecture Design for Tackling Data Heterogeneity in Federated Learning"](https://github.com/Liangqiong/ViT-FL-main)
