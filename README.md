@@ -1,21 +1,12 @@
 # Self-supervised Federated Learning (SSL-FL)
 
-* **Pytorch implementation for paper:** "Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging"
+* **Pytorch implementation for paper:** "Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging" (upcoming)
 
-## Set up environment
+## 1. Set up environment
 - ```conda env create -f environment.yml```
 - then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
 
-## Datasets and simulated data splits
-### Download data from google drive
-```pip install gdown```
-```gdown https://drive.google.com/uc?id=```
-
-- Retina: 1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL 
-- Derm / ISIC: 1EsnjGQI0exLgmPBvBQmqHFQsXaKKioRE
-- COVID-FL: TO ADD
-- Skin-FL: TO ADD
-
+## 2. Download Dataset from google drive
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -33,10 +24,7 @@
 </tr>
 </tbody></table>
 
-
-If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
-
-### Download gdrive for file uploading (optional)
+<!-- ### Download gdrive for file uploading (optional)
 Step1: ```wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz```
 
 Step2: ```tar -xvf gdrive_2.1.1_linux_386.tar.gz```
@@ -45,13 +33,15 @@ Step3: ```./gdrive about```
 
 Step4: ```./gdrive upload /home/documents/file_name.zip```
 
-Step5: ```./gdrive list```
+Step5: ```./gdrive list``` -->
 
-## Self-supervised Federated Pre-training
-- Fed-BEiT: ```beit/run_beit_pretrain_FedAvg.py```
-- Fed-MAE: ```mae/run_mae_pretrain_FedAvg.py```
-### Fine-tuning with pre-trained checkpoints
+## 3. Download the pre-trained models
+In this paper, we choose ViT-B/16 as the backbone for all the methods:
+`BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
+The models were pretrained with 224x224 resolution.
+
 The following table provides the pre-trained checkpoints used in the paper:
+### 3.1 For self-supervised federated pre-training directly on target task data
 ### Fed-BEiT Retina
 <table><tbody>
 <!-- START TABLE -->
@@ -114,25 +104,34 @@ The following table provides the pre-trained checkpoints used in the paper:
 </tr>
 </tbody></table>
 
-## IMNET Pretrained models
-### BEiT ImageNet-22k
-BEiT weights pretrained on ImageNet-22k. The models were pretrained with 224x224 resolution.
-- `BEiT-base`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
+You can also run self-supervised Federated Pre-training on your own datasets with the following python files: 
+- Fed-BEiT: ```beit/run_beit_pretrain_FedAvg.py```
+- Fed-MAE: ```mae/run_mae_pretrain_FedAvg.py```
+If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
 
-Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
-- BEiT-base: [beit_base_patch16_224_pt22k.pth](https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth)
-- Dall-e Tokenizers: [download link](https://drive.google.com/file/d/1DkXJTQC7ELCoBUwq8j4XNoxe7dkPUEdr/view?usp=sharing)
+### 3.2 For supervised pre-training with ImageNet-22k
+Download the ViT-B/16 weights pre-trained on ImageNet-22k:
+```wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz```
+See more details in https://github.com/google-research/vision_transformer.
 
-### MAE ImageNet-22k
-MAE weights pretrained on ImageNet-22k. The models were pretrained with 224x224 resolution.
-Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
-- MAE-base: [mae_pretrain_vit_base.pth](https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth)
+### 3.3 For self-supervised pre-training with ImageNet-22k
+**BEiT ImageNet**
+Download BEiT weights pre-trained on ImageNet-22k: 
+```wget https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth```
+Download Dall-e tokenizers: 
+```wget -o $TOKENIZER_PATH/encoder.pkl https://cdn.openai.com/dall-e/encoder.pkl```
+```wget -o $TOKENIZER_PATH/decoder.pkl https://cdn.openai.com/dall-e/decoder.pkl```
 
+**MAE ImageNet**
+Download MAE weights pretrained on ImageNet-22k:
+```wget https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth```
 
-## Self-supervised Federated Fine-tuning
+## 4. Train Model (self-supervised federated fine-tuning)
+You can also run self-supervised Federated Fine-tuning on your own datasets with the following python files: 
 - Fed-BEiT: ```beit/run_class_finetune_FedAvg.py```
 - Fed-MAE: ```mae/run_class_finetune_FedAvg.py```
 
-Scripts for BEiT and MAE and in beit/script and mae/script.
+Scripts are in beit/script and mae/script.
 
-This repository is based on https://github.com/microsoft/unilm/tree/master/beit and https://github.com/facebookresearch/mae.
+## Acknowledgements
+* This repository is based on [BEiT](https://github.com/microsoft/unilm/tree/master/beit) and [MAE](https://github.com/facebookresearch/mae).
