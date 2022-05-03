@@ -33,7 +33,7 @@ Step5: ```./gdrive list```
 - Fed-MAE: ```unilm/mae/run_mae_pretraining_FedAvg.py```
 ### Fine-tuning with pre-trained checkpoints
 The following table provides the pre-trained checkpoints used in the paper:
-### BEiT Retina
+### Fed-BEiT Retina
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -51,7 +51,7 @@ The following table provides the pre-trained checkpoints used in the paper:
 </tr>
 </tbody></table>
 
-### MAE Retina
+### Fed-MAE Retina
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -69,7 +69,7 @@ The following table provides the pre-trained checkpoints used in the paper:
 </tr>
 </tbody></table>
 
-### BEiT COVID-FL
+### Fed-BEiT COVID-FL
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -83,7 +83,7 @@ The following table provides the pre-trained checkpoints used in the paper:
 </tr>
 </tbody></table>
 
-### MAE COVID-FL
+### Fed-MAE COVID-FL
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
