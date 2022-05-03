@@ -7,13 +7,31 @@
 ## Datasets and simulated data splits
 ### Download data from google drive
 ```pip install gdown```
-
 ```gdown https://drive.google.com/uc?id=```
 
 - Retina: 1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL 
 - Derm / ISIC: 1EsnjGQI0exLgmPBvBQmqHFQsXaKKioRE
 - COVID-FL: TO ADD
 - Skin-FL: TO ADD
+
+### Fed-MAE Retina
+<table><tbody>
+<!-- START TABLE -->
+<!-- TABLE HEADER -->
+<th valign="bottom"></th>
+<th valign="bottom">Retina</th>
+<th valign="bottom">Derm</th>
+<th valign="bottom">COVID-FL</th>
+<th valign="bottom">Skin-FL</th>
+<!-- TABLE BODY -->
+<tr><td align="left">pre-trained checkpoint</td>
+<td align="center"><a href="https://drive.google.com/file/d/1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL/view?usp=sharing">download</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1EsnjGQI0exLgmPBvBQmqHFQsXaKKioRE/view?usp=sharing">download</a></td>
+<td align="center"><a href="">download</a></td>
+<td align="center"><a href="">download</a></td>
+</tr>
+</tbody></table>
+
 
 If you want to test on new datasets, please modify unilm/datasets.py and FedAvg_utils/data_utils.py
 
