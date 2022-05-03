@@ -107,15 +107,17 @@ The following table provides the pre-trained checkpoints used in the paper:
 You can also run self-supervised Federated Pre-training on your own datasets with the following python files: 
 - Fed-BEiT: ```beit/run_beit_pretrain_FedAvg.py```
 - Fed-MAE: ```mae/run_mae_pretrain_FedAvg.py```
+
 If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
 
 ### 3.2 For supervised pre-training with ImageNet-22k
 Download the ViT-B/16 weights pre-trained on ImageNet-22k:
 ```wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz```
+
 See more details in https://github.com/google-research/vision_transformer.
 
 ### 3.3 For self-supervised pre-training with ImageNet-22k
-**BEiT ImageNet**
+**BEiT ImageNet: **
 Download BEiT weights pre-trained on ImageNet-22k: 
 - ```wget https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth```
 
@@ -123,9 +125,9 @@ Download Dall-e tokenizers:
 - ```wget -o $TOKENIZER_PATH/encoder.pkl https://cdn.openai.com/dall-e/encoder.pkl```
 - ```wget -o $TOKENIZER_PATH/decoder.pkl https://cdn.openai.com/dall-e/decoder.pkl```
 
-**MAE ImageNet**
+**MAE ImageNet: **
 Download MAE weights pretrained on ImageNet-22k:
-```wget https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth```
+- ```wget https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth```
 
 ## 4. Train Model (self-supervised federated fine-tuning)
 You can also run self-supervised Federated Fine-tuning on your own datasets with the following python files: 
