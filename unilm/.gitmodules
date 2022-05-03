@@ -1,3 +1,0 @@
-[submodule "deltalm/fairseq"]
-	path = deltalm/fairseq
-	url = https://github.com/pytorch/fairseq.git
