@@ -7,7 +7,7 @@ cd /home/yan/SSL-FL/${MODEL_NAME}/
 DATASET='ISIC'
 SPLIT_TYPE='split_3'
 N_CLASSES=7
-DATA_PATH="/data1/yan/SSL-FL/${DATASET}/"
+DATA_PATH="/data/yan/SSL-FL/${DATASET}/"
 N_CLIENTS=5
 MASK_RATIO=0.6
 AUG='aug_2'
@@ -17,7 +17,7 @@ EPOCHS=1600
 BLR='1.5e-3'
 BATCH_SIZE=16
 
-OUTPUT_PATH="/data1/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_blr${BLR}_bs${BATCH_SIZE}_ratio${MASK_RATIO}_dis8_${AUG}"
+OUTPUT_PATH="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/${DATASET}_pretrained_beit_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_blr${BLR}_bs${BATCH_SIZE}_ratio${MASK_RATIO}_dis8_${AUG}"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=8 run_mae_pretrain_FedAvg.py \
        --data_path ${DATA_PATH} \
