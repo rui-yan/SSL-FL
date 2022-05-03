@@ -115,7 +115,7 @@ If you want to test on new datasets, please modify datasets.py and FedAvg_utils/
 
 ### 3.2 For supervised pre-training with ImageNet-22k
 Download the ViT-B/16 weights pre-trained on ImageNet-22k:
-```wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz```
+- ```wget https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz```
 
 See more details in https://github.com/google-research/vision_transformer.
 
