@@ -1,6 +1,6 @@
 # Self-supervised Federated Learning (SSL-FL)
 
-* **Pytorch implementation for paper: "Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging"
+* **Pytorch implementation for paper:** "Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging"
 
 ## Set up environment
 - ```conda env create -f environment.yml```
