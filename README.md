@@ -14,7 +14,6 @@
 - COVID-FL: TO ADD
 - Skin-FL: TO ADD
 
-### Fed-MAE Retina
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -27,8 +26,8 @@
 <tr><td align="left">pre-trained checkpoint</td>
 <td align="center"><a href="https://drive.google.com/file/d/1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1EsnjGQI0exLgmPBvBQmqHFQsXaKKioRE/view?usp=sharing">download</a></td>
-<td align="center"><a href="">download</a></td>
-<td align="center"><a href="">download</a></td>
+<td align="center">TODO</td>
+<td align="center">TODO</td>
 </tr>
 </tbody></table>
 
@@ -56,13 +55,11 @@ The following table provides the pre-trained checkpoints used in the paper:
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
 <th valign="bottom"></th>
-<th valign="bottom">Central</th>
 <th valign="bottom">Split-1</th>
 <th valign="bottom">Split-2</th>
 <th valign="bottom">Split-3</th>
 <!-- TABLE BODY -->
 <tr><td align="left">pre-trained checkpoint</td>
-<td align="center"><a href="">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1cMRtumZUm9Ftt8AssuKSUoxACkCEmaAg/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1x_xdQDHFjEpwCq4AyMflHW8QITP3tvN5/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1TPgoyqYK2ZBn4GmOdXX5AlDe8CrgWpx-/view?usp=sharing">download</a></td>
