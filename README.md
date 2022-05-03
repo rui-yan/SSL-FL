@@ -117,10 +117,11 @@ See more details in https://github.com/google-research/vision_transformer.
 ### 3.3 For self-supervised pre-training with ImageNet-22k
 **BEiT ImageNet**
 Download BEiT weights pre-trained on ImageNet-22k: 
-```wget https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth```
+- ```wget https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth```
+
 Download Dall-e tokenizers: 
-```wget -o $TOKENIZER_PATH/encoder.pkl https://cdn.openai.com/dall-e/encoder.pkl```
-```wget -o $TOKENIZER_PATH/decoder.pkl https://cdn.openai.com/dall-e/decoder.pkl```
+- ```wget -o $TOKENIZER_PATH/encoder.pkl https://cdn.openai.com/dall-e/encoder.pkl```
+- ```wget -o $TOKENIZER_PATH/decoder.pkl https://cdn.openai.com/dall-e/decoder.pkl```
 
 **MAE ImageNet**
 Download MAE weights pretrained on ImageNet-22k:
