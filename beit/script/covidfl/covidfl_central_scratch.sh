@@ -2,7 +2,7 @@
 
 MODEL_NAME='beit'
 
-cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
+cd /home/yan/SSL-FL/${MODEL_NAME}/
 
 DATASET='COVIDfl'
 SPLIT_TYPE='central'

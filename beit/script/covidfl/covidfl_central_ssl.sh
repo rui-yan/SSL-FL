@@ -2,7 +2,7 @@
 
 MODEL_NAME='beit'
 
-cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
+cd /home/yan/SSL-FL/${MODEL_NAME}/
 
 DATASET='COVIDfl'
 SPLIT_TYPE='central'
@@ -54,12 +54,3 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launc
      --warmup_epochs 5 --layer_decay 0.65 --drop_path 0.2 --sync_bn \
      --weight_decay 0.05 --layer_scale_init_value 0.1 --clip_grad 3.0 \
      --n_clients ${N_CLIENTS} --E_epoch 1 --max_communication_rounds ${FT_EPOCHS} --num_local_clients -1 
-
-# # ------------------ evaluate ----------------- #
-# CKPT_PATH="${OUTPUT_PATH_FT}/checkpoint-best.pth"
-# CUDA_VISIBLE_DEVICES=3 python main_finetune.py \
-#     --eval --model beit_base_patch16_224 --data_path $DATA_PATH \
-#     --nb_classes ${N_CLASSES} --data_set ${DATASET} \
-#     --resume $CKPT_PATH \
-#     --batch_size ${FT_BATCH_SIZE} \
-#     --E_epoch 1 --max_communication_rounds 100 --num_local_clients -1 --split_type ${SPLIT_TYPE}

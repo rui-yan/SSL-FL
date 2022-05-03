@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/yan/SSL-FL/unilm/beit/
+cd /home/yan/SSL-FL/beit/
 
 DATASET='Retina'
 SPLIT_TYPE='split_1'
@@ -14,7 +14,7 @@ FT_LR='3e-3'
 FT_BATCH_SIZE=64
 OUTPUT_PATH_FT="/data/yan/SSL-FL/fedavg_model_ckpt_${N_CLIENTS}/random_init_beit_base/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 main_finetune.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=4 run_class_finetune_FedAvg.py \
 
      --data_path ${DATA_PATH} \
      --data_set ${DATASET} \

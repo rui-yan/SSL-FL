@@ -2,7 +2,7 @@
 
 MODEL_NAME='mae'
 
-cd /home/yan/SSL-FL/unilm/${MODEL_NAME}/
+cd /home/yan/SSL-FL/${MODEL_NAME}/
 
 DATASET='COVIDfl'
 SPLIT_TYPE='split_real'
@@ -18,7 +18,7 @@ BLR='1.5e-3'
 BATCH_SIZE=32
 OUTPUT_PATH="/data/yan/SSL-FL/fedavg_${MODEL_NAME}_ckpt_${N_CLIENTS}/${DATASET}_pretrain_${MODEL_NAME}_base/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_blr${BLR}_bs${BATCH_SIZE}_ratio${MASK_RATIO}_dis${N_GPUS}"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=${N_GPUS} run_mae_pretraining_FedAvg.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=${N_GPUS} run_mae_pretrain_FedAvg.py \
         --data_path ${DATA_PATH} \
         --data_set ${DATASET} \
         --model_name ${MODEL_NAME} \
@@ -43,7 +43,7 @@ FT_LR='3e-3'
 FT_BATCH_SIZE=64
 OUTPUT_PATH_FT="${OUTPUT_PATH}/finetune_${DATASET}_epoch${FT_EPOCHS}_${SPLIT_TYPE}_lr${FT_LR}_bs${FT_BATCH_SIZE}_dis${N_GPUS}"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=${N_GPUS} run_class_finetuning_FedAvg.py \
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=${N_GPUS} run_class_finetune_FedAvg.py \
      --data_path ${DATA_PATH} \
      --data_set ${DATASET} \
      --model_name ${MODEL_NAME} \
