@@ -6,7 +6,7 @@
 - ```conda env create -f environment.yml```
 - then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
 
-## 2. Download Dataset from google drive
+## 2. Download Dataset
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -35,13 +35,14 @@ Step4: ```./gdrive upload /home/documents/file_name.zip```
 
 Step5: ```./gdrive list``` -->
 
-## 3. Download the pre-trained models
+## 3. Download the Pre-trained Checkpoints
 In this paper, we choose ViT-B/16 as the backbone for all the methods:
 `BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
 The models were pretrained with 224x224 resolution.
 
 The following table provides the pre-trained checkpoints used in the paper:
-### 3.1 For self-supervised federated pre-training directly on target task data
+### 3.1 For Self-supervised Federated Pre-Training 
+(i.e., pre-training directly on decentralized target task data)
 ### Fed-BEiT Retina
 <table><tbody>
 <!-- START TABLE -->
@@ -129,7 +130,7 @@ Download Dall-e tokenizers:
 Download MAE weights pretrained on ImageNet-22k:
 - ```wget https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth```
 
-## 4. Train Model (self-supervised federated fine-tuning)
+## 4. Train Model (Self-supervised Federated Fine-Tuning)
 You can also run self-supervised Federated Fine-tuning on your own datasets with the following python files: 
 - Fed-BEiT: ```beit/run_class_finetune_FedAvg.py```
 - Fed-MAE: ```mae/run_class_finetune_FedAvg.py```
