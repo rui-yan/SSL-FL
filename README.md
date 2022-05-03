@@ -37,7 +37,9 @@ Step5: ```./gdrive list``` -->
 
 ## 3. Download the Pre-trained Checkpoints
 In this paper, we choose ViT-B/16 as the backbone for all the methods:
+
 `BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
+
 The models were pretrained with 224x224 resolution.
 
 The following table provides the pre-trained checkpoints used in the paper:
