@@ -75,7 +75,7 @@ The following table provides the pre-trained checkpoints used in the paper:
 <!-- TABLE HEADER -->
 <th valign="bottom"></th>
 <th valign="bottom">Central</th>
-<th valign="bottom">Real-world Split/th>
+<th valign="bottom">Real-world Split</th>
 <!-- TABLE BODY -->
 <tr><td align="left">pre-trained checkpoint</td>
 <td align="center"><a href="https://drive.google.com/file/d/1WI9TnIudIUmIfC6t3OyjPSR0T0LVlg7G/view?usp=sharing">download</a></td>
@@ -89,7 +89,7 @@ The following table provides the pre-trained checkpoints used in the paper:
 <!-- TABLE HEADER -->
 <th valign="bottom"></th>
 <th valign="bottom">Central</th>
-<th valign="bottom">Real-world Split/th>
+<th valign="bottom">Real-world Split</th>
 <!-- TABLE BODY -->
 <tr><td align="left">pre-trained checkpoint</td>
 <td align="center"><a href="https://drive.google.com/file/d/1Ma55OepDzjcGHRYHVg4GahCxH9OY16gm/view?usp=sharing">download</a></td>
