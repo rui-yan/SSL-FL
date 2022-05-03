@@ -32,7 +32,7 @@
 </tbody></table>
 
 
-If you want to test on new datasets, please modify unilm/datasets.py and FedAvg_utils/data_utils.py
+If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
 
 ### Download gdrive for file uploading (optional)
 Step1: ```wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz```
@@ -131,4 +131,4 @@ Download checkpoints that are **self-supervised pretrained** on ImageNet-22k:
 - Fed-BEiT: ```beit/run_class_finetune_FedAvg.py```
 - Fed-MAE: ```mae/run_class_finetune_FedAvg.py```
 
-Scripts for BEiT and MAE and in unilm/beit/script and unilm/mae/script.
+Scripts for BEiT and MAE and in beit/script and mae/script.
