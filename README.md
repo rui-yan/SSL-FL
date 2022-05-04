@@ -17,8 +17,8 @@
 <th valign="bottom">Skin-FL</th>
 <!-- TABLE BODY -->
 <tr><td align="left">pre-trained checkpoint</td>
-<td align="center"><a href="https://drive.google.com/file/d/1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL/view?usp=sharing">download</a></td>
-<td align="center"><a href="https://drive.google.com/file/d/1EsnjGQI0exLgmPBvBQmqHFQsXaKKioRE/view?usp=sharing">download</a></td>
+<td align="center">TODO</a></td>
+<td align="center">TODO</td>
 <td align="center">TODO</td>
 <td align="center">TODO</td>
 </tr>
