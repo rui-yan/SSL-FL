@@ -51,6 +51,13 @@ Step4: ```./gdrive upload /home/documents/file_name.zip```
 Step5: ```./gdrive list``` -->
 
 ## Self-supervised Federated Learning for Medical Image Classification
+
+In this paper, we choose ViT-B/16 as the backbone for all the methods:
+
+`BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
+
+The models were pretrained with 224x224 resolution.
+
 ### Self-supervised Federated Pre-training
 (i.e., pre-training directly on decentralized target task data)
 
@@ -60,13 +67,7 @@ You can run self-supervised Federated Pre-training on your own datasets with the
 
 If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
 
-We also provide the **Pre-trained Checkpoints** as follows. In this paper, we choose ViT-B/16 as the backbone for all the methods:
-
-`BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
-
-The models were pretrained with 224x224 resolution.
-
-The following table provides the pre-trained checkpoints used in the paper:
+The following table provides the **pre-trained checkpoints** used in the paper:
 
 #### Federated pre-training with Retina
 <table><tbody>
