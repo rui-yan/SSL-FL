@@ -32,7 +32,7 @@ We will release the data preparation instruction and the data soon.
 <th valign="bottom">Skin-FL</th>
 <!-- TABLE BODY -->
 <tr><td align="left">Link</td>
-<td align="center">[link](https://drive.google.com/file/d/1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL/view?usp=sharing)</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL/view?usp=sharing">link</a></td>
 <td align="center">TODO</td>
 <td align="center">TODO</td>
 <td align="center">TODO</td>
