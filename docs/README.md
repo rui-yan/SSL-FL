@@ -4,7 +4,7 @@ Self-supervised Federated Learning (SSL-FL)
 
 [ArXiv]() | [Cite](#reference)
 
-***TL;DR:** Pytorch implementation of self-supervised federated learning framework proposed in [our paper]() for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
+***TL;DR:** Pytorch implementation of the self-supervised federated learning framework proposed in [our paper]() for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
 
 - Our framework employs masked image encoding as self-supervised task to learn efficient representations from images.
 - Extensive experiments are performed on diverse medical datasets including retinal images, dermatology images and chest X-rays.
@@ -67,33 +67,29 @@ We also provide the **Pre-trained Checkpoints** as follows. In this paper, we ch
 The models were pretrained with 224x224 resolution.
 
 The following table provides the pre-trained checkpoints used in the paper:
-#### Fed-BEiT Retina
-<table><tbody>
-<!-- START TABLE -->
-<!-- TABLE HEADER -->
-<th valign="bottom"></th>
-<th valign="bottom">Split-1</th>
-<th valign="bottom">Split-2</th>
-<th valign="bottom">Split-3</th>
-<!-- TABLE BODY -->
-<tr><td align="left">pre-trained checkpoint</td>
-<td align="center"><a href="https://drive.google.com/file/d/1cMRtumZUm9Ftt8AssuKSUoxACkCEmaAg/view?usp=sharing">download</a></td>
-<td align="center"><a href="https://drive.google.com/file/d/1x_xdQDHFjEpwCq4AyMflHW8QITP3tvN5/view?usp=sharing">download</a></td>
-<td align="center"><a href="https://drive.google.com/file/d/1TPgoyqYK2ZBn4GmOdXX5AlDe8CrgWpx-/view?usp=sharing">download</a></td>
-</tr>
-</tbody></table>
 
-#### Fed-MAE Retina
+#### Federated pre-training with Retina
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
-<th valign="bottom"></th>
+<th valign="bottom">Method</th>
+<th valign="bottom">Pre-training Data</th>
 <th valign="bottom">Central</th>
 <th valign="bottom">Split-1</th>
 <th valign="bottom">Split-2</th>
 <th valign="bottom">Split-3</th>
 <!-- TABLE BODY -->
-<tr><td align="left">pre-trained checkpoint</td>
+<tr>
+<td align="left">Fed-BEiT</td>
+<td align="left">Retina</td>
+<td align="center"></td>
+<td align="center"><a href="https://drive.google.com/file/d/1cMRtumZUm9Ftt8AssuKSUoxACkCEmaAg/view?usp=sharing">download</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1x_xdQDHFjEpwCq4AyMflHW8QITP3tvN5/view?usp=sharing">download</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1TPgoyqYK2ZBn4GmOdXX5AlDe8CrgWpx-/view?usp=sharing">download</a></td>
+</tr>
+<tr>
+<td align="left">Fed-MAE</td>
+<td align="left">Retina</td>
 <td align="center"><a href="https://drive.google.com/file/d/1Sih-9HPISfaR48DplmbvYmtv_xh2V8RJ/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/18cG2rrweNKc8LS5LBTcUAt9A4om3YWGz/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1Rdfm_o5CFWucLKckiOYbBr9UfEfcPaOu/view?usp=sharing">download</a></td>
@@ -101,29 +97,24 @@ The following table provides the pre-trained checkpoints used in the paper:
 </tr>
 </tbody></table>
 
-#### Fed-BEiT COVID-FL
+#### Federated pre-training with COVID-FL
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
-<th valign="bottom"></th>
+<th valign="bottom">Method</th>
+<th valign="bottom">Pre-training Data</th>
 <th valign="bottom">Central</th>
 <th valign="bottom">Real-world Split</th>
 <!-- TABLE BODY -->
-<tr><td align="left">pre-trained checkpoint</td>
+<tr>
+<td align="left">Fed-BEiT</td>
+<td align="left">COVID-FL</td>
 <td align="center"><a href="https://drive.google.com/file/d/1WI9TnIudIUmIfC6t3OyjPSR0T0LVlg7G/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1B7fcORHeUB2rKTUu0vlTXqrcOc-XVub-/view?usp=sharing">download</a></td>
 </tr>
-</tbody></table>
-
-#### Fed-MAE COVID-FL
-<table><tbody>
-<!-- START TABLE -->
-<!-- TABLE HEADER -->
-<th valign="bottom"></th>
-<th valign="bottom">Central</th>
-<th valign="bottom">Real-world Split</th>
-<!-- TABLE BODY -->
-<tr><td align="left">pre-trained checkpoint</td>
+<tr>
+<td align="left">Fed-MAE</td>
+<td align="left">COVID-FL</td>
 <td align="center"><a href="https://drive.google.com/file/d/1Ma55OepDzjcGHRYHVg4GahCxH9OY16gm/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/16FIte4hkp5I9MUztEcgmAA2F02_2Zr1S/view?usp=sharing">download</a></td>
 </tr>
