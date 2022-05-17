@@ -67,7 +67,7 @@ You can run self-supervised Federated Pre-training on your own datasets with the
 
 If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
 
-The following table provides the **pre-trained checkpoints** used in the paper:
+The following tables provide the **pre-trained checkpoints** used in the paper:
 
 #### Federated pre-training with Retina
 <table><tbody>
