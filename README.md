@@ -2,7 +2,7 @@ Self-supervised Federated Learning (SSL-FL)
 ===========
 ### Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging 
 
-[ArXiv](https://arxiv.org/abs/2004.09666) | [Cite](#reference)
+[ArXiv]() | [Cite](#reference)
 
 ***TL;DR:** Pytorch implementation of self-supervised federated learning framework proposed in [our paper](https://arxiv.org/abs/2009.10190) for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
 
