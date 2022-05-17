@@ -127,7 +127,7 @@ Download the ViT-B/16 weights pre-trained on ImageNet-22k:
 See more details in https://github.com/google-research/vision_transformer.
 
 ### Self-supervised pre-training with ImageNet-22k
-**BEiT ImageNet: **
+**BEiT ImageNet:**
 Download BEiT weights pre-trained on ImageNet-22k: 
 - ```wget https://unilm.blob.core.windows.net/beit/beit_base_patch16_224_pt22k.pth```
 
@@ -135,7 +135,7 @@ Download Dall-e tokenizers:
 - ```wget https://cdn.openai.com/dall-e/encoder.pkl```
 - ```wget https://cdn.openai.com/dall-e/decoder.pkl```
 
-**MAE ImageNet: **
+**MAE ImageNet:**
 Download MAE weights pretrained on ImageNet-22k:
 - ```wget https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth```
 
