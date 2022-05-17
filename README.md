@@ -4,13 +4,13 @@ Self-supervised Federated Learning (SSL-FL)
 
 [ArXiv]() | [Cite](#reference)
 
-***TL;DR:** Pytorch implementation of self-supervised federated learning framework proposed in [our paper](https://arxiv.org/abs/2009.10190) for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
+***TL;DR:** Pytorch implementation of self-supervised federated learning framework proposed in [our paper]() for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
 
 - Our framework employs masked image encoding as self-supervised task to learn efficient representations from images.
 - Extensive experiments are performed on diverse medical datasets including retinal images, dermatology images and chest X-rays.
 - In particular, we implement BEiT and MAE as the self-supervision learning module.
 
-[<img src="Fig1.pdf" width="470px" align="left" />][<img src="Fig2.pdf" width="470px" align="right" />]
+[<img src="fig1.pdf" width="470px" align="left" />][<img src="fig2.pdf" width="470px" align="right" />]
 
 ## Pre-requisites:
 ### Set Up Environment
