@@ -16,9 +16,9 @@ Self-supervised Federated Learning (SSL-FL)
 ## Pre-requisites:
 ### Set Up Environment
 * ```conda env create -f environment.yml```
-<!--* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```-->
 * NVIDIA GPU (Tested on Nvidia Tesla V100 32G x 4, and Nvidia GeForce RTX 2080 Ti x 8 on local workstations
 * Python (3.8.12), torch (1.7.1), numpy (1.21.2), pandas (1.4.2), scikit-learn (1.0.2), scipy (1.7.1), seaborn (0.11.2)
+<!--* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```-->
 
 ### Data Preparation
 We will release the data preparation instruction and the data soon.
