@@ -1,12 +1,26 @@
-# Self-supervised Federated Learning (SSL-FL)
+Self-supervised Federated Learning (SSL-FL)
+===========
+### Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging 
 
-* **Pytorch implementation for paper:** "Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging" (upcoming)
+[ArXiv](https://arxiv.org/abs/2004.09666) | [Cite](#reference)
 
-## 1. Set up environment
-- ```conda env create -f environment.yml```
-- then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
+***TL;DR:** Pytorch implementation of self-supervised federated learning framework proposed in [our paper](https://arxiv.org/abs/2009.10190) for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
 
-## 2. Download Dataset
+- Our framework employs masked image encoding as self-supervised task to learn efficient representations from images.
+- Extensive experiments are performed on diverse medical datasets including retinal images, dermatology images and chest X-rays.
+- In particular, we implement BEiT and MAE as the self-supervision learning module.
+
+[<img src="Fig1.pdf" width="470px" align="left" />][<img src="Fig2.pdf" width="470px" align="right" />]
+
+## Pre-requisites:
+### Set Up Environment
+* ```conda env create -f environment.yml```
+* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
+* NVIDIA GPU (Tested on Nvidia Tesla V100 32G x 4, and Nvidia GeForce RTX 2080 Ti x 8 on local workstations
+* Python (3.8.12), torch (1.7.1+cu110), numpy (1.21.2), pandas (1.4.2), scikit-learn (1.0.2), scipy (1.7.1), seaborn (0.11.2)
+
+### Data Preparation
+We will release the data preparation instruction and the data soon.
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -35,16 +49,23 @@ Step4: ```./gdrive upload /home/documents/file_name.zip```
 
 Step5: ```./gdrive list``` -->
 
-## 3. Download the Pre-trained Checkpoints
-In this paper, we choose ViT-B/16 as the backbone for all the methods:
+## Self-supervised Federated Learning for Medical Image Classification
+### Self-supervised Federated Pre-training
+(i.e., pre-training directly on decentralized target task data)
+
+You can run self-supervised Federated Pre-training on your own datasets with the following python files: 
+- Fed-BEiT: ```beit/run_beit_pretrain_FedAvg.py```
+- Fed-MAE: ```mae/run_mae_pretrain_FedAvg.py```
+
+If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
+
+We also provide the **Pre-trained Checkpoints** as follows. In this paper, we choose ViT-B/16 as the backbone for all the methods:
 
 `BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
 
 The models were pretrained with 224x224 resolution.
 
 The following table provides the pre-trained checkpoints used in the paper:
-### 3.1 For Self-supervised Federated Pre-Training 
-(i.e., pre-training directly on decentralized target task data)
 ### Fed-BEiT Retina
 <table><tbody>
 <!-- START TABLE -->
@@ -106,12 +127,6 @@ The following table provides the pre-trained checkpoints used in the paper:
 <td align="center"><a href="https://drive.google.com/file/d/16FIte4hkp5I9MUztEcgmAA2F02_2Zr1S/view?usp=sharing">download</a></td>
 </tr>
 </tbody></table>
-
-You can also run self-supervised Federated Pre-training on your own datasets with the following python files: 
-- Fed-BEiT: ```beit/run_beit_pretrain_FedAvg.py```
-- Fed-MAE: ```mae/run_mae_pretrain_FedAvg.py```
-
-If you want to test on new datasets, please modify datasets.py and FedAvg_utils/data_utils.py
 
 ### 3.2 For supervised pre-training with ImageNet-22k
 Download the ViT-B/16 weights pre-trained on ImageNet-22k:
