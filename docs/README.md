@@ -31,7 +31,7 @@ We will release the data preparation instruction and the data soon.
 <th valign="bottom">COVID-FL</th>
 <th valign="bottom">Skin-FL</th>
 <!-- TABLE BODY -->
-<tr><td align="left">pre-trained checkpoint</td>
+<tr><td align="left">Link</td>
 <td align="center">TODO</a></td>
 <td align="center">TODO</td>
 <td align="center">TODO</td>
