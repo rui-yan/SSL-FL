@@ -11,7 +11,7 @@ Self-supervised Federated Learning (SSL-FL)
 - In particular, we implement BEiT and MAE as the self-supervision learning module.
 
 <!-- [<img src="figure1.png" width="300px" align="left" />] -->
-<img src="figure2.png" width="1200px" align="center" />
+<img src="figure2.png" align="center" />
 
 ## Pre-requisites:
 ### Set Up Environment
