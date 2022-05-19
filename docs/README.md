@@ -32,7 +32,7 @@ We will release the data preparation instruction and the data soon.
 <th valign="bottom">Skin-FL</th>
 <!-- TABLE BODY -->
 <tr><td align="left">Link</td>
-<td align="center"><a href="https://drive.google.com/file/d/1BsOWjvBXktsHnKjNRol-PGF6HrYDyyrL/view?usp=sharing">link</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1V5RR_VzfGdHCuI_am6uCohEqvKtjbeDY/view?usp=sharing">link</a></td>
 <td align="center">TODO</td>
 <td align="center">TODO</td>
 <td align="center">TODO</td>
@@ -81,7 +81,7 @@ If you want to test on new datasets, please modify datasets.py and FedAvg_utils/
 <tr>
 <td align="left">Fed-BEiT</td>
 <td align="left">Retina</td>
-<td align="center"></td>
+<td align="center"><a href="https://drive.google.com/file/d/1wxmxgbAws9ahrh8BAv7XW5RUZEy9BMbo/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1cMRtumZUm9Ftt8AssuKSUoxACkCEmaAg/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1x_xdQDHFjEpwCq4AyMflHW8QITP3tvN5/view?usp=sharing">download</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1TPgoyqYK2ZBn4GmOdXX5AlDe8CrgWpx-/view?usp=sharing">download</a></td>
