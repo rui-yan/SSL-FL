@@ -153,8 +153,6 @@ The current work is on Arxiv and under review. If you find our work helpful in y
 
 Yan, R., Qu, L., Wei, Q., Huang, S.C., Shen, L., Rubin, D., Xing, L. and Zhou, Y., 2022. Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging. arXiv preprint arXiv:2205.08576.
 
-Lu, M.Y., Williamson, D.F.K., Chen, T.Y. et al. Data-efficient and weakly supervised computational pathology on whole-slide images. Nat Biomed Eng 5, 555–570 (2021). https://doi.org/10.1038/s41551-020-00682-w
-
 ```
 @article{yan2022label,
   title={Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging},
