@@ -151,6 +151,19 @@ This work was funded by National Institutes of Health (NIH) under grants R01CA25
 ## Reference
 The current work is on Arxiv and under review. If you find our work helpful in your research or if you use the code or datasets, please consider citing our paper. 
 
+Yan, R., Qu, L., Wei, Q., Huang, S.C., Shen, L., Rubin, D., Xing, L. and Zhou, Y., 2022. Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging. arXiv preprint arXiv:2205.08576.
+
+Lu, M.Y., Williamson, D.F.K., Chen, T.Y. et al. Data-efficient and weakly supervised computational pathology on whole-slide images. Nat Biomed Eng 5, 555–570 (2021). https://doi.org/10.1038/s41551-020-00682-w
+
+```
+@article{yan2022label,
+  title={Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging},
+  author={Yan, Rui and Qu, Liangqiong and Wei, Qingyue and Huang, Shih-Cheng and Shen, Liyue and Rubin, Daniel and Xing, Lei and Zhou, Yuyin},
+  journal={arXiv preprint arXiv:2205.08576},
+  year={2022}
+}
+```
+
 ## Acknowledgements
 * This repository is based on [BEiT](https://github.com/microsoft/unilm/tree/master/beit) and [MAE](https://github.com/facebookresearch/mae).
 * The main FL setup is based on prior work ["Rethinking Architecture Design for Tackling Data Heterogeneity in Federated Learning"](https://github.com/Liangqiong/ViT-FL-main)
