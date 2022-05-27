@@ -87,7 +87,7 @@ def valid(args, model, data_loader):
         batch_size = images.shape[0]
         metric_logger.update(loss=loss.item())
         metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
-
+    
     # gather the stats from all processes
     # metric_logger.synchronize_between_processes()
     print('* Acc@1 {top1.global_avg:.3f} loss {losses.global_avg:.3f}'
@@ -208,8 +208,7 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
                 p.requires_grad = True
 
     if args.distributed:
-        if args.sync_bn:
-            "activate synchronized batch norm"
+        if args.sync_bn: #activate synchronized batch norm
             model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
             
     for proxy_single_client in args.proxy_clients:

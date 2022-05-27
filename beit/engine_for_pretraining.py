@@ -38,7 +38,7 @@ def train_one_epoch(args, model: torch.nn.Module, d_vae: torch.nn.Module,
         # assign learning rate & weight decay for each step
         args.global_step_per_client[proxy_single_client] += 1
         if lr_schedule_values is not None or wd_schedule_values is not None:
-            for i, param_group in enumerate(optimizer.param_groups):
+            for it, param_group in enumerate(optimizer.param_groups):
                 if lr_schedule_values is not None:
                     param_group["lr"] = lr_schedule_values[it] * param_group["lr_scale"]
                 if wd_schedule_values is not None and param_group["weight_decay"] > 0:

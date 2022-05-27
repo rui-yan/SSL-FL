@@ -23,8 +23,8 @@ import torch.utils.data as data
 from torchvision import transforms
 
 class DatasetFLPretrain(data.Dataset):
-    def __init__(self, args, no_transform=False):    
-        self.transform = None
+    """ data loader for pre-training """
+    def __init__(self, args):    
         
         if args.data_set == 'CIFAR10':
             
@@ -34,28 +34,21 @@ class DatasetFLPretrain(data.Dataset):
             self.data_all = data_all[args.split_type]            
             self.data = self.data_all['data'][args.single_client]
             self.labels = self.data_all['target'][args.single_client]
-            
+        
         elif args.data_set == 'Retina' or args.data_set == 'COVIDfl' or args.data_set == 'ISIC':
-            
+        
             if args.split_type == 'central':
                 cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
             else:
                 cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
                                               args.split_type, args.single_client)
-                
+            
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
                           open(os.path.join(args.data_path, 'labels.csv'))}
             
-        if no_transform == False:
-            self.transform = DataAugmentationForPretrain(args)
-        else:
-            self.transform = transforms.Compose([
-                transforms.Resize(args.input_size),
-                transforms.ToTensor(),
-            ])
-            
+        self.transform = DataAugmentationForPretrain(args)
         self.args = args
 
     def __getitem__(self, index):
@@ -68,7 +61,6 @@ class DatasetFLPretrain(data.Dataset):
         if self.args.data_set == 'CIFAR10':
             img = self.data[index]
             target = self.labels[index]
-                
         else:
             index = index % len(self.img_paths)
             
@@ -103,9 +95,10 @@ class DatasetFLPretrain(data.Dataset):
 
 
 class DatasetFLFinetune(data.Dataset):
+    """ data loader for fine-tuning """
     def __init__(self, args, phase, mode='finetune'):
         super(DatasetFLFinetune, self).__init__()
-        self.phase = phase        
+        self.phase = phase
         is_train = (phase == 'train')
         
         # CIFAR dataset
@@ -122,17 +115,16 @@ class DatasetFLFinetune(data.Dataset):
                 self.data = data_all['union_' + phase]['data']
                 self.labels = data_all['union_' + phase]['target']
         
-        # Retina dataset
         elif args.data_set == 'Retina' or args.data_set == 'COVIDfl' or args.data_set == 'ISIC':
             if not is_train: 
                 args.single_client = os.path.join(args.data_path, f'{self.phase}.csv')
-
+            
             if args.split_type == 'central':
                 cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
             else:
                 cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
                                               args.split_type, args.single_client)
-                
+            
             self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
             
             self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
@@ -243,6 +235,7 @@ def create_dataset_and_evalmetrix(args, mode='pretrain'):
             args.current_acc[single_client] = 0
             args.current_test_acc[single_client] = []
             args.best_eval_loss[single_client] = 9999
+
 
 def crop_top(img, percent=0.15):
     offset = int(img.shape[0] * percent)

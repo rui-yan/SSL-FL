@@ -83,7 +83,6 @@ def get_args():
                         type=str, help='dataset for pretraining')
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
-    parser.add_argument('--aug', default='aug_2', type=str)
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
     parser.add_argument('--log_dir', default=None,
@@ -118,8 +117,7 @@ def get_args():
                         help="Total communication rounds")
     parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")
-    parser.add_argument("--split_type", type=str, choices=["split_1", "split_2", "split_3", "split_real", "central"], 
-                        default="central", help="Which data partitions to use")
+    parser.add_argument("--split_type", type=str, default="central", help="Which data partitions to use")
     
     return parser.parse_args()
 
@@ -181,8 +179,6 @@ def main(args, model):
             cur_tot_client_Lens += args.clients_with_len[client]
         
         for cur_single_client, proxy_single_client in zip(cur_selected_clients, args.proxy_clients):
-            print('cur_single_client: ', cur_single_client)
-            print('proxy_single_client: ', proxy_single_client)
             
             args.single_client = cur_single_client
             args.clients_weightes[proxy_single_client] = args.clients_with_len[cur_single_client] / cur_tot_client_Lens
@@ -304,17 +300,3 @@ if __name__ == '__main__':
     
     # run pretraining
     main(opts, model)
-    
-    # Show final performance
-#     message = '\n \n ==========Start showing final performance ============ \n'
-#     message += 'Final union loss is: %2.5f with std: %2.5f \n' %  \
-#                    (np.asarray(list(opts.current_loss.values())).mean(), 
-#                     np.asarray(list(opts.current_loss.values())).std())
-#     # message += "================ End ================ \n"
-    
-#     with open(opts.file_name, 'a+') as args_file:
-#         args_file.write(message)
-#         args_file.write('\n')
-    
-#     print(message)
-    
