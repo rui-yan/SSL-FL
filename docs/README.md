@@ -145,9 +145,6 @@ You can also run self-supervised Federated Fine-tuning on your own datasets with
 
 Scripts are in beit/script and mae/script. More details about model training will be added.
 
-## Funding
-This work was funded by National Institutes of Health (NIH) under grants R01CA256890, R01CA227713, and U01CA242879.
-
 ## Reference
 If you find our work helpful in your research or if you use the code or datasets, please consider citing our paper. 
 
