@@ -23,7 +23,8 @@ from engine_for_finetuning import train_one_epoch, evaluate
 from copy import deepcopy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/')
+#sys.path.insert(1, '/home/yan/SSL-FL/')
+sys.path.append('..')
 
 import util.misc as misc
 
@@ -134,8 +135,7 @@ def get_args():
                         help='How to apply mixup/cutmix params. Per "batch", "pair", or "elem"')
 
     # * Finetuning params
-    parser.add_argument('--finetune', default='',
-                        help='finetune from checkpoint')
+    parser.add_argument('--finetune', default='', help='finetune from checkpoint')
     parser.add_argument('--global_pool', action='store_true')
     parser.set_defaults(global_pool=True)
     parser.add_argument('--model_key', default='model|module', type=str)
@@ -147,16 +147,14 @@ def get_args():
     parser.add_argument('--disable_weight_decay_on_rel_pos_bias', action='store_true', default=False)
 
     # Dataset parameters
-    parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
-                        help='dataset path')
+    parser.add_argument('--data_path', default='/data/yan/SSL-FL/Retina', type=str, help='dataset path')
     parser.add_argument('--eval_data_path', default=None, type=str,
                         help='dataset path for evaluation')
     parser.add_argument('--nb_classes', default=0, type=int,
                         help='number of the classification types')
     parser.add_argument('--imagenet_default_mean_and_std', default=False, action='store_true')
 
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'ISIC', 'Retina', 'IMNET', 'COVIDfl', 'image_folder'],
-                        type=str, help='ImageNet dataset path')
+    parser.add_argument('--data_set', default='Retina', type=str, help='ImageNet dataset path') # choices=['Retina', 'Derm', 'COVIDfl']
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
     parser.add_argument('--log_dir', default=None,
@@ -440,10 +438,7 @@ def main(args, model):
                         log_writer.flush()
                     with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
                         f.write(json.dumps(log_stats) + "\n")
-            
-            # we use frequent transfer of model between GPU and CPU due to limitation of GPU memory
-            # model.to('cpu')
-            
+        
         # =========== model average and eval ============ 
         # average model
         average_model(args, model_avg, model_all)

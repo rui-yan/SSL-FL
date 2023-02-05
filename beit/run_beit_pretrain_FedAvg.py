@@ -23,7 +23,8 @@ from engine_for_pretraining import train_one_epoch
 from copy import deepcopy
 
 import sys
-sys.path.insert(1, '/home/yan/SSL-FL/')
+sys.path.append('..')
+# sys.path.insert(1, '/home/yan/SSL-FL/')
 
 import util.misc as misc
 
@@ -101,14 +102,9 @@ def get_args():
                         help='Interpolation for discrete vae (random, bilinear, bicubic default: "lanczos")')
 
     # Dataset parameters
-    parser.add_argument('--data_set', default='IMNET', choices=['CIFAR10', 'COVIDfl', 'ISIC', 
-                                                                'IMNET', 'Retina', 'image_folder'],
-                        type=str, help='dataset for pretraining')
-    parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
-                        help='dataset path')
-    parser.add_argument('--aug', default='aug_1', type=str)
+    parser.add_argument('--data_path', default='/data/yan/SSL-FL/Retina', type=str, help='dataset path')
+    parser.add_argument('--data_set', default='Retina', type=str, help='dataset for pretraining')
     parser.add_argument('--imagenet_default_mean_and_std', default=False, action='store_true')
-
     parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
     parser.add_argument('--log_dir', default=None,
