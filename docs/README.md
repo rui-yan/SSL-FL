@@ -32,9 +32,9 @@ We will release the data preparation instruction and the data soon.
 <th valign="bottom">Skin-FL</th>
 <!-- TABLE BODY -->
 <tr><td align="left">Link</td>
-<td align="center"><a href="https://drive.google.com/file/d/1V5RR_VzfGdHCuI_am6uCohEqvKtjbeDY/view?usp=sharing">link</a></td>
-<td align="center">TODO</td>
-<td align="center">TODO</td>
+<td align="center"><a href="https://drive.google.com/file/d/1V5RR_VzfGdHCuI_am6uCohEqvKtjbeDY/view?usp=share_link">link</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1fDEKMyF9rHOMf4pY_q7Ys33uka4Z_kN6/view?usp=share_link">link</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1445S6t1jU0nhmE6HBhqs7p58ZKlt8nNS/view?usp=share_link">link</a></td>
 <td align="center">TODO</td>
 </tr>
 </tbody></table>
