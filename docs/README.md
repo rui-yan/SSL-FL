@@ -149,16 +149,17 @@ Scripts are in beit/script and mae/script. More details about model training wil
 This work was funded by National Institutes of Health (NIH) under grants R01CA256890, R01CA227713, and U01CA242879.
 
 ## Reference
-The current work is on Arxiv and under review. If you find our work helpful in your research or if you use the code or datasets, please consider citing our paper. 
+If you find our work helpful in your research or if you use the code or datasets, please consider citing our paper. 
 
-Yan, R., Qu, L., Wei, Q., Huang, S.C., Shen, L., Rubin, D., Xing, L. and Zhou, Y., 2022. Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging. arXiv preprint arXiv:2205.08576.
+Yan, Rui, et al. "Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging." IEEE Transactions on Medical Imaging (2023).
 
 ```
-@article{yan2022label,
-  title={Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging},
+@article{yan2023label,
+  title={Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging},
   author={Yan, Rui and Qu, Liangqiong and Wei, Qingyue and Huang, Shih-Cheng and Shen, Liyue and Rubin, Daniel and Xing, Lei and Zhou, Yuyin},
-  journal={arXiv preprint arXiv:2205.08576},
-  year={2022}
+  journal={IEEE Transactions on Medical Imaging},
+  year={2023},
+  publisher={IEEE}
 }
 ```
 
