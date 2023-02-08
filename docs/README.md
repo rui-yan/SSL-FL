@@ -13,6 +13,19 @@ Self-supervised Federated Learning (SSL-FL)
 <!-- [<img src="figure1.png" width="300px" align="left" />] -->
 <img src="figure2.png" width="800px" align="center" />
 
+## Reference
+If you find our work helpful in your research or if you use any source codes or datasets, please cite our paper. The bibtex is listed below:
+
+```
+@article{yan2023label,
+  title={Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging},
+  author={Yan, Rui and Qu, Liangqiong and Wei, Qingyue and Huang, Shih-Cheng and Shen, Liyue and Rubin, Daniel and Xing, Lei and Zhou, Yuyin},
+  journal={IEEE Transactions on Medical Imaging},
+  year={2023},
+  publisher={IEEE}
+}
+```
+
 ## Pre-requisites:
 ### Set Up Environment
 * ```conda env create -f environment.yml```
@@ -21,7 +34,9 @@ Self-supervised Federated Learning (SSL-FL)
 <!--* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```-->
 
 ### Data Preparation
-We will release the data preparation instruction and the data soon.
+In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets. More details about the datasets can be found in our paper.
+We will add more details about the construction of these datasets. The download links to the datasets are also provided below.
+
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -145,20 +160,6 @@ You can also run self-supervised Federated Fine-tuning on your own datasets with
 
 Scripts are in beit/script and mae/script. More details about model training will be added.
 
-## Reference
-If you find our work helpful in your research or if you use the code or datasets, please consider citing our paper. 
-
-Yan, Rui, et al. "Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging." IEEE Transactions on Medical Imaging (2023).
-
-```
-@article{yan2023label,
-  title={Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging},
-  author={Yan, Rui and Qu, Liangqiong and Wei, Qingyue and Huang, Shih-Cheng and Shen, Liyue and Rubin, Daniel and Xing, Lei and Zhou, Yuyin},
-  journal={IEEE Transactions on Medical Imaging},
-  year={2023},
-  publisher={IEEE}
-}
-```
 
 ## Acknowledgements
 * This repository is based on [BEiT](https://github.com/microsoft/unilm/tree/master/beit) and [MAE](https://github.com/facebookresearch/mae).
