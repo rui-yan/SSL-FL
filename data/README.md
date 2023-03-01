@@ -1,27 +1,39 @@
 ### Data Preparation
 In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets. 
 
-├── data
-│   ├── Retina
-│   │   ├── 5_clients
-│   │   │   ├── split_1
+project/
+├── src/
+│   ├── index.html
+│   ├── styles/
+│   │   ├── style.css
+│   ├── scripts/
+│   │   ├── main.js
+├── images/
+│   ├── logo.png
+
+
+
+├── data/
+│   ├── Retina/
+│   │   ├── 5_clients/
+│   │   │   ├── split_1/
 │   │   │   │   ├── client_1.csv
 │   │   │   │   ├── client_2.csv
 │   │   │   │   ├── client_3.csv
 │   │   │   │   ├── client_4.csv
 │   │   │   │   ├── client_5.csv
-│   │   │   ├── split_2
-│   │   │   ├── split_3
-│   │   ├── central
-│   │   ├── test
-│   │   ├── train
+│   │   │   ├── split_2/
+│   │   │   ├── split_3/
+│   │   ├── central/
+│   │   ├── test/
+│   │   ├── train/
 │   │   ├── train.csv
 │   │   ├── test.csv
 │   │   ├── labels.csv
-│   ├── COVID-FL
-│   ├── Derm
-│   ├── tokenizer_weight
-│   ├── ckpts
+│   ├── COVID-FL/
+│   ├── Derm/
+│   ├── tokenizer_weight/
+│   ├── ckpts/
 
 More details about the datasets can be found in our paper.
 
