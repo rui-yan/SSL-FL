@@ -139,6 +139,6 @@ def view_split(data_path, n_clients, beta_list=[100, 1, 0.5], save_plot=False):
     
     return out
 
-# data_path='/data/yan/SSL-FL/Retina'
+# data_path='/home/yan/SSL-FL/data/Retina'
 # data_split(data_path=data_path, n_clients=5, n_classes=2)
 # view_split(data_path, n_clients=5, save_plot=True)
