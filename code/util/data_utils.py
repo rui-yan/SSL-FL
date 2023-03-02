@@ -1,5 +1,6 @@
 # --------------------------------------------------------
 # Based on BEiT and MAE code bases
+# Pretrain and Finetune datasets for FL SSL.
 # https://github.com/microsoft/unilm/tree/master/beit
 # https://github.com/facebookresearch/mae
 # Author: Rui Yan
