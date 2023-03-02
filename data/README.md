@@ -44,7 +44,9 @@ data
 |-- ckpts
 ```
 
-Each data folder contains 'n_clients' subfolder, which includes data split information in a .csv file. The .csv file contains the filenames of the images belonging to each client in the data split.
+Each data folder contains 'n_clients' subfolder, which includes data split information in a .csv file. The .csv file contains the filenames of the images belonging to each client in the data split. 
+
+Here, data_split.py is used to simulate the IID and non-IID data partitions, and you can visualize the generated data partitions in (view_data_split.ipynb)[https://github.com/rui-yan/SSL-FL/blob/main/data/view_data_split.ipynb].
 
 If you would like to train using your own custom datasets, please ensure that your data is organized according to the directory structure mentioned above. Additionally, you can modify the data augmentation strategies in SSL-FL/code/util/datasets and the data loader in SSL-FL/code/util/data_utils.py.
 
