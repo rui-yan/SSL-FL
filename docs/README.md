@@ -34,16 +34,13 @@ If you find our work helpful in your research or if you use any source codes or 
 <!--* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```-->
 
 ### Data Preparation
-Please refer to SSL-FL/data for information on the directory structures of data folders and for the download links to datasets.
-We also provide instructions on how to train on custom datasets in SSL/data/README.md
+Please refer to [SSL-FL/data](https://github.com/rui-yan/SSL-FL/tree/main/data) for information on the directory structures of data folders, download links to datasets, and instructions on how to train on custom datasets.
 
 ## Self-supervised Federated Learning for Medical Image Classification
 
-In this paper, we choose ViT-B/16 as the backbone for all the methods:
+In this paper, we selected ViT-B/16 as the backbone for all methods. The specifications for BEiT-B are as follows: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M).
 
-`BEiT-B`: #layer=12; hidden=768; FFN factor=4x; #head=12; patch=16x16 (#parameters: 86M)
-
-Please refer to SSL-FL/data for access to the links to **pre-trained checkpoints** that were used to generate the results.
+Please refer to [SSL-FL/data](https://github.com/rui-yan/SSL-FL/tree/main/data) for access to the links to **pre-trained checkpoints** that were used to generate the results.
 
 ### Self-supervised Federated Pre-training and fine-tuning
 
