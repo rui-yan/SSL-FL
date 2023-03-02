@@ -44,7 +44,7 @@ Please refer to [SSL-FL/data](https://github.com/rui-yan/SSL-FL/tree/main/data) 
 
 ### Self-supervised Federated Pre-training and fine-tuning
 
-Sample scripts for running Fed-BEiT and Fed-MAE pre-training and finetuning on the Retina dataset can be found in the following directories: [SSL-FL/code/fed_beit/script/retina](https://github.com/rui-yan/SSL-FL/blob/main/code/fed_beit/script/retina/retina_split1_ssl.sh) for Fed-BEiT and [SSL-FL/code/fed_mae/script/retina]((https://github.com/rui-yan/SSL-FL/blob/main/code/fed_mae/script/retina/retina_split1_ssl.sh)) for Fed-MAE.
+Sample scripts for running Fed-BEiT and Fed-MAE pre-training and finetuning on the Retina dataset can be found in the following directories: [SSL-FL/code/fed_beit/script/retina](https://github.com/rui-yan/SSL-FL/blob/main/code/fed_beit/script/retina/retina_split1_ssl.sh) for Fed-BEiT and [SSL-FL/code/fed_mae/script/retina](https://github.com/rui-yan/SSL-FL/blob/main/code/fed_mae/script/retina/retina_split1_ssl.sh) for Fed-MAE.
 
 To run Fed-BEiT, please download Dall-e tokenizers and save encoder.pkl and decoder.pkl to SSL-FL/data/tokenizer_weight: 
 - ```wget https://cdn.openai.com/dall-e/encoder.pkl```
