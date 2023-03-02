@@ -60,9 +60,9 @@ Below are the download links for the Retina, COVID-FL, and Derm datasets.
 <th valign="bottom">COVID-FL</th>
 <!-- TABLE BODY -->
 <tr><td align="left">Download Link</td>
-<td align="center"><a href="https://drive.google.com/file/d/1V5RR_VzfGdHCuI_am6uCohEqvKtjbeDY/view?usp=share_link">link</a></td>
-<td align="center"><a href="https://drive.google.com/file/d/1fDEKMyF9rHOMf4pY_q7Ys33uka4Z_kN6/view?usp=share_link">link</a></td>
-<td align="center"><a href="https://drive.google.com/file/d/1445S6t1jU0nhmE6HBhqs7p58ZKlt8nNS/view?usp=share_link">link</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1bW--_qRZnWbkb0XXvGBCSferdqXZ6pe7/view?usp=share_link">link</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/10M-yNrsQ6OdbRrn_Dj72ebHs9LxQtsZp/view?usp=share_link">link</a></td>
+<td align="center"><a href="https://drive.google.com/file/d/1cuvoYvt-EVs5qtA5Xgos0yUJmfPhRbwg/view?usp=share_link">link</a></td>
 </tr>
 </tbody></table>
 
