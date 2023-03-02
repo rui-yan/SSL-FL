@@ -1,43 +1,36 @@
 ### Data Preparation
 In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets. 
 
-project/
-├── src/
-│   ├── index.html
-│   ├── styles/
-│   │   ├── style.css
-│   ├── scripts/
-│   │   ├── main.js
-├── images/
-│   ├── logo.png
+.
+|-- Retina
+    |-- central
+    |-- 5_clients/
+        |-- split_1/
+            |-- client_1.csv
+            |-- client_2.csv
+            |-- client_3.csv
+            |-- client_4.csv
+            |-- client_5.csv
+        |-- split_2
+        |-- split_3
+    |-- train
+    |-- test
+    |-- train.csv
+    |-- test.csv
+    |-- labels.csv
+|-- COVID-FL
+    |-- central
+    |-- 12_clients
+        |-- split_real
+    |-- train
+    |-- test
+    |-- train.csv
+    |-- test.csv
+    |-- labels.csv
+|-- tokenizer_weight
+|-- ckpts
 
-
-
-├── data/
-│   ├── Retina/
-│   │   ├── 5_clients/
-│   │   │   ├── split_1/
-│   │   │   │   ├── client_1.csv
-│   │   │   │   ├── client_2.csv
-│   │   │   │   ├── client_3.csv
-│   │   │   │   ├── client_4.csv
-│   │   │   │   ├── client_5.csv
-│   │   │   ├── split_2/
-│   │   │   ├── split_3/
-│   │   ├── central/
-│   │   ├── test/
-│   │   ├── train/
-│   │   ├── train.csv
-│   │   ├── test.csv
-│   │   ├── labels.csv
-│   ├── COVID-FL/
-│   ├── Derm/
-│   ├── tokenizer_weight/
-│   ├── ckpts/
-
-More details about the datasets can be found in our paper.
-
-The download links to the datasets are also provided below.
+The download links to the datasets are provided below.
 
 <table><tbody>
 <!-- START TABLE -->
@@ -55,6 +48,9 @@ The download links to the datasets are also provided below.
 <td align="center">TODO</td>
 </tr>
 </tbody></table>
+
+https://cdn.openai.com/dall-e/encoder.pkl
+
 
 ### Use gdown to download data to your path (optional)
 Step1: ```pip install gdown```
