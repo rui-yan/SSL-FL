@@ -2,7 +2,7 @@
 In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets. 
 
 ```
-.
+data
 |-- Retina
     |-- central
     |-- 5_clients/
@@ -23,6 +23,18 @@ In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets.
     |-- central
     |-- 12_clients
         |-- split_real
+            |-- bimcv.csv  
+            |-- cohen.csv  
+            |-- eurorad.csv  
+            |-- gz.csv  
+            |-- ml-workgroup.csv  
+            |-- ricord_c.csv  
+            |-- rsna-0.csv  
+            |-- rsna-1.csv  
+            |-- rsna-2.csv  
+            |-- rsna-3.csv  
+            |-- rsna-4.csv  
+            |-- sirm.csv
     |-- train
     |-- test
     |-- train.csv
@@ -32,8 +44,11 @@ In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets.
 |-- ckpts
 ```
 
-The download links to the datasets are provided below.
+Each data folder contains 'n_clients' subfolders, each of which includes data split information in a .csv file. The .csv file contains the filenames of the images belonging to each client in the data split.
 
+If you would like to train using your own custom datasets, please ensure that your data is organized according to the directory structure mentioned above. Additionally, you can modify the data augmentation strategies in SSL-FL/code/util/datasets and the data loader in SSL-FL/code/util/data_utils.py.
+
+Below are the download links for the Retina, COVID-FL, and Derm datasets.
 <table><tbody>
 <!-- START TABLE -->
 <!-- TABLE HEADER -->
@@ -51,10 +66,6 @@ The download links to the datasets are provided below.
 </tr>
 </tbody></table>
 
-https://cdn.openai.com/dall-e/encoder.pkl
-
-
 ### Use gdown to download data to your path (optional)
 Step1: ```pip install gdown```
-
 Step2: ```gdown https://drive.google.com/uc?id=<the_file_id>```
