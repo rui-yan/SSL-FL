@@ -1,6 +1,6 @@
 # --------------------------------------------------------
-Data Augmentation techniques for Fed-BEiT and Fed-MAE during 
-pre-training and fine-tuning.
+# Data Augmentation techniques for Fed-BEiT and Fed-MAE during 
+# pre-training and fine-tuning.
 # --------------------------------------------------------'
 import torch
 
