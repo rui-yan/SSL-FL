@@ -46,7 +46,7 @@ data
 
 Each data folder contains 'n_clients' subfolder, which includes data split information in a .csv file. The .csv file contains the filenames of the images belonging to each client in the data split. 
 
-Here, data_split.py is used to simulate the IID and non-IID data partitions, and you can visualize the generated data partitions in (view_data_split.ipynb)[https://github.com/rui-yan/SSL-FL/blob/main/data/view_data_split.ipynb].
+Here, data_split.py is used to simulate the IID and non-IID data partitions, and you can visualize the generated data partitions in [view_data_split.ipynb](https://github.com/rui-yan/SSL-FL/blob/main/data/view_data_split.ipynb).
 
 If you would like to train using your own custom datasets, please ensure that your data is organized according to the directory structure mentioned above. Additionally, you can modify the data augmentation strategies in SSL-FL/code/util/datasets and the data loader in SSL-FL/code/util/data_utils.py.
 
@@ -58,13 +58,11 @@ Below are the download links for the Retina, COVID-FL, and Derm datasets.
 <th valign="bottom">Retina</th>
 <th valign="bottom">Derm</th>
 <th valign="bottom">COVID-FL</th>
-<th valign="bottom">Skin-FL</th>
 <!-- TABLE BODY -->
-<tr><td align="left">Link</td>
+<tr><td align="left">Download Link</td>
 <td align="center"><a href="https://drive.google.com/file/d/1V5RR_VzfGdHCuI_am6uCohEqvKtjbeDY/view?usp=share_link">link</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1fDEKMyF9rHOMf4pY_q7Ys33uka4Z_kN6/view?usp=share_link">link</a></td>
 <td align="center"><a href="https://drive.google.com/file/d/1445S6t1jU0nhmE6HBhqs7p58ZKlt8nNS/view?usp=share_link">link</a></td>
-<td align="center">TODO</td>
 </tr>
 </tbody></table>
 
