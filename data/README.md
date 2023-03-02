@@ -1,6 +1,7 @@
 ### Data Preparation
 In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets. 
 
+```
 .
 |-- Retina
     |-- central
@@ -29,6 +30,7 @@ In this paper, we conduct experiments on Retina, Derm and COVID-FL datasets.
     |-- labels.csv
 |-- tokenizer_weight
 |-- ckpts
+```
 
 The download links to the datasets are provided below.
 
