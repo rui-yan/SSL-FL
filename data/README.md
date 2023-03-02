@@ -48,8 +48,9 @@ Each data folder contains 'n_clients' subfolder, which includes data split infor
 
 Here, [data_split.py](https://github.com/rui-yan/SSL-FL/blob/main/data/data_split.py) is used to simulate the IID and non-IID data partitions, and you can visualize the generated data partitions in [view_data_split.ipynb](https://github.com/rui-yan/SSL-FL/blob/main/data/view_data_split.ipynb).
 
-If you would like to train using your own custom datasets, please ensure that your data is organized according to the directory structure mentioned above. Additionally, you can modify the data augmentation strategies in [SSL-FL/code/util/datasets.py](https://github.com/rui-yan/SSL-FL/blob/main/code/util/datasets.py) and the data loader in [SSL-FL/code/util/data_utils.py](https://github.com/rui-yan/SSL-FL/blob/main/code/util/data_utils.py).
+**If you want to train the model using your own custom datasets, please ensure that your data is organized according to the directory structure mentioned above.** Alternatively, you may modify the data loader in [SSL-FL/code/util/data_utils.py](https://github.com/rui-yan/SSL-FL/blob/main/code/util/data_utils.py). You can also customize the data augmentation techniques used during training by modifying [SSL-FL/code/util/datasets.py](https://github.com/rui-yan/SSL-FL/blob/main/code/util/datasets.py).
 
+### Download data used in the paper from Google Drive
 Below are the download links for the Retina, COVID-FL, and Derm datasets.
 <table><tbody>
 <!-- START TABLE -->
@@ -66,10 +67,11 @@ Below are the download links for the Retina, COVID-FL, and Derm datasets.
 </tr>
 </tbody></table>
 
-### Use gdown to download data to your path (optional)
+#### Use gdown to download data to your path (optional)
 Step1: ```pip install gdown```
 
 Step2: ```gdown https://drive.google.com/uc?id=<the_file_id>``` where <the_file_id> can be obtained from the download links above.
+
 
 
 ### Fed-BEiT and Fed-MAE pre-trained model checkpoints on target datasets: 
