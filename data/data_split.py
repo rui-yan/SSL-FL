@@ -4,6 +4,7 @@
 
 import os
 import csv
+import glob
 from collections import Counter
 import numpy as np
 import pandas as pd
@@ -107,34 +108,37 @@ def data_split(data_path, n_clients, n_classes, beta_list=[100, 1, 0.5]):
                 writer.writerow(client_split)            
 
     
-def view_split(data_path, n_clients, beta_list=[100, 1, 0.5], save_plot=False):
+def view_split(data_path, n_clients=5, save_plot=False):
     '''
     Visualize data splits saved in data_path/{n_clients}_clients: 
     '''
+        
     labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
               open(os.path.join(data_path, 'labels.csv'))}
-    
-    out={}
-    for split_id in range(len(beta_list)):
-        dist={}
-        for k in range(n_clients):
-            cur_clint_path = os.path.join(data_path, f'{n_clients}_clients', f'split_{split_id+1}', f'client_{k+1}.csv')
-            img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
 
-            dist[f'client_{k+1}'] = Counter([label for fname, label in labels.items() if fname in img_paths])
-        out[f'split_{split_id+1}'] = dist
+    clients_path = f'{data_path}/{n_clients}_clients'
+    split_folders = os.listdir(clients_path)
+
+    out={}
+    for split_id in split_folders:
+        dist={}
+        client_files = glob.glob(f"{clients_path}/{split_id}/*.csv")
+        for cur_clint_path in client_files:
+            client = os.path.basename(cur_clint_path)
+            img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
+            dist[client] = Counter([label for fname, label in labels.items() if fname in img_paths])
+        out[split_id] = dist
     
     if save_plot:
         df = pd.DataFrame(out)
-        for split_id in range(len(beta_list)):
+        for split_id in split_folders:
             df_split = df.iloc[:,split_id].apply(pd.Series)
             df_split = df_split.reindex(sorted(df_split.columns), axis=1)
             df_split['client_id'] = sorted(df_split.index)
-            df_split.plot(x='client_id', kind='barh', rot=0, stacked=True, colormap='tab20c', title=f'split{split_id+1}')
+            df_split.plot(x='client_id', kind='barh', rot=0, stacked=True, colormap='tab20c', title=split_folders)
             plt.legend(title='class', loc='upper right')
-            
-            data_set = os.path.split(data_path)[1]
-            plt.savefig(f"./plots/{n_clients}_clients/{data_set}_split{split_id+1}.png")
+            # data_set = os.path.split(data_path)[1]
+            # plt.savefig(f"./plots/{n_clients}_clients/{data_set}_{split_id}.png")
             plt.show()
     
     return out
