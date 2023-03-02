@@ -77,20 +77,19 @@ class DatasetFLFinetune(data.Dataset):
         self.phase = phase
         is_train = (phase == 'train')
         
-        if args.data_set == 'Retina' or args.data_set == 'COVIDfl' or args.data_set == 'ISIC':
-            if not is_train: 
-                args.single_client = os.path.join(args.data_path, f'{self.phase}.csv')
-            
-            if args.split_type == 'central':
-                cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
-            else:
-                cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
-                                              args.split_type, args.single_client)
-            
-            self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
-            
-            self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
-                          open(os.path.join(args.data_path, 'labels.csv'))}
+        if not is_train: 
+            args.single_client = os.path.join(args.data_path, f'{self.phase}.csv')
+        
+        if args.split_type == 'central':
+            cur_clint_path = os.path.join(args.data_path, args.split_type, args.single_client)
+        else:
+            cur_clint_path = os.path.join(args.data_path, f'{args.n_clients}_clients', 
+                                            args.split_type, args.single_client)
+        
+        self.img_paths = list({line.strip().split(',')[0] for line in open(cur_clint_path)})
+        
+        self.labels = {line.strip().split(',')[0]: float(line.strip().split(',')[1]) for line in
+                        open(os.path.join(args.data_path, 'labels.csv'))}
         
         self.transform = build_transform(is_train, mode, args)
         
