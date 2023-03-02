@@ -44,11 +44,12 @@ data
 |-- ckpts
 ```
 
-Each data folder contains 'n_clients' subfolder, which includes data split information in a .csv file. The .csv file contains the filenames of the images belonging to each client in the data split. 
-
-Here, [data_split.py](https://github.com/rui-yan/SSL-FL/blob/main/data/data_split.py) is used to simulate the IID and non-IID data partitions, and you can visualize the generated data partitions in [view_data_split.ipynb](https://github.com/rui-yan/SSL-FL/blob/main/data/view_data_split.ipynb).
+Each data folder contains 'n_clients' subfolder (n is the number of clients in the federated dataset), which includes data split information in a .csv file. The .csv file contains the filenames of the images belonging to each client in the data split. 
 
 **If you want to train the model using your own custom datasets, please ensure that your data is organized according to the directory structure mentioned above.** Alternatively, you may modify the data loader in [SSL-FL/code/util/data_utils.py](https://github.com/rui-yan/SSL-FL/blob/main/code/util/data_utils.py). You can also customize the data augmentation techniques used during training by modifying [SSL-FL/code/util/datasets.py](https://github.com/rui-yan/SSL-FL/blob/main/code/util/datasets.py).
+
+### FL data construction
+Here, [data_split.py](https://github.com/rui-yan/SSL-FL/blob/main/data/data_split.py) is used to simulate the IID and non-IID data partitions for Retina and Derm datasets. We will provide more details about the construction of COVID-FL dataset. You can visualize the generated data partitions in [view_data_split.ipynb](https://github.com/rui-yan/SSL-FL/blob/main/data/view_data_split.ipynb).
 
 ### Download data used in the paper from Google Drive
 Below are the download links for the Retina, COVID-FL, and Derm datasets.
