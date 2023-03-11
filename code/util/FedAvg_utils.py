@@ -155,7 +155,10 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         # model_all
         model_all[proxy_single_client] = deepcopy(model)
         model_all[proxy_single_client] = model_all[proxy_single_client].to(device)
-        model_all[proxy_single_client] = torch.nn.parallel.DistributedDataParallel(model_all[proxy_single_client], device_ids=[args.gpu], find_unused_parameters=True)
+
+        if args.distributed:
+            model_all[proxy_single_client] = torch.nn.parallel.DistributedDataParallel(model_all[proxy_single_client], 
+                                                                                       sdevice_ids=[args.gpu], find_unused_parameters=True)
         
         if args.distributed:
             model_without_ddp = model_all[proxy_single_client].module
