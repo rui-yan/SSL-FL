@@ -120,6 +120,7 @@ class DatasetFLFinetune(data.Dataset):
 
         else:
             img = np.array(Image.open(path).convert("RGB"))
+            img = resize(img, (224, 224)) # add this line
         
         if img.ndim < 3:
             img = np.stack((img,)*3, axis=-1)
