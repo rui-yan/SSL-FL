@@ -116,9 +116,10 @@ class DatasetFLFinetune(data.Dataset):
         
         if self.args.data_set == 'Retina':
             img = np.load(path)
-            img = resize(img, (256, 256))
         else:
             img = np.array(Image.open(path).convert("RGB"))
+        
+        img = resize(img, (256, 256))
         
         if img.ndim < 3:
             img = np.concatenate((img,)*3, axis=-1)
@@ -126,10 +127,8 @@ class DatasetFLFinetune(data.Dataset):
             img = img[:,:,:3]
         
         if self.transform is not None:
-            print('previous: ', img.shape)
             img = Image.fromarray(np.uint8(img))
             sample = self.transform(img)
-            print('after: ', sample.shape)
 
         return sample, target
 
