@@ -155,10 +155,10 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
         # model_all
         model_all[proxy_single_client] = deepcopy(model)
         model_all[proxy_single_client] = model_all[proxy_single_client].to(device)
-
+        
         if args.distributed:
             model_all[proxy_single_client] = torch.nn.parallel.DistributedDataParallel(model_all[proxy_single_client], 
-                                                                                       sdevice_ids=[args.gpu], find_unused_parameters=True)
+                                                                                       device_ids=[args.gpu], find_unused_parameters=True)
         
         if args.distributed:
             model_without_ddp = model_all[proxy_single_client].module
@@ -255,9 +255,6 @@ def Partial_Client_Selection(args, model, mode='pretrain'):
 
         # loss_scaler_all
         loss_scaler_all[proxy_single_client] = NativeScaler()
-
-        # resume model if specified
-        # misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
 
         # get the total decay steps first
         args.t_total[proxy_single_client] = num_training_steps_per_inner_epoch * args.E_epoch * args.max_communication_rounds

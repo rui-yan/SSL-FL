@@ -161,9 +161,6 @@ def get_args():
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--resume', default='',
                         help='resume from checkpoint')
-    parser.add_argument('--auto_resume', action='store_true')
-    parser.add_argument('--no_auto_resume', action='store_false', dest='auto_resume')
-    parser.set_defaults(auto_resume=True)
 
     parser.add_argument('--save_ckpt', action='store_true')
     parser.add_argument('--no_save_ckpt', action='store_false', dest='save_ckpt')

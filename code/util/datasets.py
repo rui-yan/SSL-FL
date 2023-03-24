@@ -38,7 +38,7 @@ class DataAugmentationForPretrain(object):
                         second_interpolation=args.second_interpolation,
                     ),
                 ])
-            elif args.data_set == 'COVIDfl':
+            elif args.data_set == 'COVID-FL':
                 self.common_transform = transforms.Compose([
                     transforms.ColorJitter(hue=.05, saturation=.05),
                     transforms.RandomHorizontalFlip(p=0.5),
@@ -94,12 +94,11 @@ class DataAugmentationForPretrain(object):
                     transforms.ColorJitter(0.4, 0.4, 0.4),
                     transforms.RandomHorizontalFlip(p=0.5)])
 
-            elif args.data_set == 'COVIDfl':
+            elif args.data_set == 'COVID-FL':
                 self.common_transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.4, 1.0), interpolation=3),  # 3 is bicubic
                     transforms.ColorJitter(hue=.05, saturation=.05),
                     transforms.RandomHorizontalFlip(p=0.5)])
-
             else:
                 self.common_transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
@@ -154,7 +153,7 @@ def build_transform(is_train, mode, args):
     
     if mode == 'finetune':
         if is_train:
-            if args.data_set == 'COVIDfl':
+            if args.data_set == 'COVID-FL':
                 transform = transforms.Compose([
                     transforms.RandomResizedCrop(args.input_size, scale=(0.8, 1.2)),
                     transforms.RandomRotation(degrees=10),
