@@ -154,7 +154,7 @@ def get_args():
     parser.add_argument("--E_epoch", default=1, type=int, help="Local training epoch in FL")
     parser.add_argument("--max_communication_rounds", default=100, type=int,
                         help="Total communication rounds.")
-    parser.add_argument("--num_local_clients", default=10, choices=[10, -1], type=int, 
+    parser.add_argument("--num_local_clients", default=-1, choices=[10, -1], type=int, 
                         help="Num of local clients joined in each FL train. -1 indicates all clients")
     parser.add_argument("--split_type", type=str,default="central", help="Which data partitions to use")
 
@@ -163,30 +163,30 @@ def get_args():
 
 def main(args, model):
     misc.init_distributed_mode(args)
-    
+
     device = torch.device(args.device)
 
     # fix the seed for reproducibility
     misc.fix_random_seeds(args)
 
     cudnn.benchmark = True
-    
+
     # prepare dataset
     create_dataset_and_evalmetrix(args, mode='finetune')
-    
+
     if args.disable_eval_during_finetuning:
         dataset_val = None
     else:
         dataset_val = DatasetFLFinetune(args=args, phase='test')
-    
+
     if args.eval:
         dataset_test = DatasetFLFinetune(args=args, phase='test')
     else:
         dataset_test = None
-    
+
     num_tasks = misc.get_world_size()
     global_rank = misc.get_rank()
-    
+
     if args.dist_eval:
         if len(dataset_val) % num_tasks != 0:
             print('Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
@@ -197,7 +197,7 @@ def main(args, model):
     else:
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
     sampler_test = torch.utils.data.SequentialSampler(dataset_test)
-        
+
     if dataset_val is not None:
         data_loader_val = torch.utils.data.DataLoader(
             dataset_val, sampler=sampler_val,
@@ -208,7 +208,7 @@ def main(args, model):
         )
     else:
         data_loader_val = None
-        
+
     if dataset_test is not None:
         data_loader_test = torch.utils.data.DataLoader(
             dataset_test, sampler=sampler_test,
@@ -219,11 +219,11 @@ def main(args, model):
         )
     else:
         data_loader_test = None
-        
+
     # configuration for FedAVG, prepare model, optimizer, scheduler 
     model_all, optimizer_all, criterion_all, loss_scaler_all, mixup_fn_all = Partial_Client_Selection(args, model, mode='finetune')
     model_avg = deepcopy(model).cpu()
-    
+
     if args.log_dir is not None:
         os.makedirs(args.log_dir, exist_ok=True)
         log_writer = SummaryWriter(log_dir=args.log_dir)
@@ -236,21 +236,21 @@ def main(args, model):
     tot_clients = args.dis_cvs_files
     print('total_clients: ', tot_clients)
     epoch = -1
-    
+
     start_time = time.time()
     max_accuracy = 0.0
-        
+
     while True:
         print('epoch: ', epoch)
         epoch += 1
-        
+
         # randomly select partial clients
         if args.num_local_clients == len(args.dis_cvs_files):
             # just use all the local clients
             cur_selected_clients = args.proxy_clients
         else:
             cur_selected_clients = np.random.choice(tot_clients, args.num_local_clients, replace=False).tolist()
-        
+
         # Get the quantity of clients joined in the FL train for updating the clients weights
         cur_tot_client_Lens = 0
         for client in cur_selected_clients:
@@ -259,16 +259,16 @@ def main(args, model):
         for cur_single_client, proxy_single_client in zip(cur_selected_clients, args.proxy_clients):
             print('cur_single_client: ', cur_single_client)
             print('proxy_single_client: ', proxy_single_client)
-            
+
             args.single_client = cur_single_client
             args.clients_weightes[proxy_single_client] = args.clients_with_len[cur_single_client] / cur_tot_client_Lens
-            
+
             # ---- get dataset for each client for pretraining finetuning 
             dataset_train = DatasetFLFinetune(args=args, phase='train')
-            
+
             num_tasks = misc.get_world_size()
             global_rank = misc.get_rank()
-            
+
             print(f'=========client: {proxy_single_client} ==============')
             if args.distributed:
                 sampler_train = torch.utils.data.DistributedSampler(
@@ -278,7 +278,7 @@ def main(args, model):
                 sampler_train = torch.utils.data.RandomSampler(dataset_train)
                     
             print("Sampler_train = %s" % str(sampler_train))
-            
+
             data_loader_train = torch.utils.data.DataLoader(
                 dataset_train, sampler=sampler_train,
                 batch_size=args.batch_size,
@@ -286,14 +286,14 @@ def main(args, model):
                 pin_memory=args.pin_mem,
                 drop_last=True,
             )
-            
+
             # ---- prepare model for a client
             model = model_all[proxy_single_client]
             optimizer = optimizer_all[proxy_single_client]
             criterion = criterion_all[proxy_single_client]
             loss_scaler = loss_scaler_all[proxy_single_client]
             mixup_fn = mixup_fn_all[proxy_single_client]
-            
+
             if args.distributed:
                 model_without_ddp = model.module
             else:
@@ -307,22 +307,22 @@ def main(args, model):
             print("Batch size = %d" % total_batch_size)
             print("Number of training examples = %d" % len(dataset_train))
             print("Number of training training per epoch = %d" % num_training_steps_per_inner_epoch)
-            
+
             if args.distributed:
                 data_loader_train.sampler.set_epoch(epoch)
             if log_writer is not None:
                 log_writer.set_step(epoch)
-            
+
             if args.eval:
                 misc.load_model(args=args, model_without_ddp=model_without_ddp,
                                 optimizer=optimizer, loss_scaler=loss_scaler, model_ema=None)
-                
+
                 test_stats = valid(args, model, data_loader_test)
                 print(f"Accuracy of the network on the {len(dataset_test)} test images: {test_stats['acc1']:.1f}%")
                 model.cpu()
-                
+
                 exit(0)
-            
+
             for inner_epoch in range(args.E_epoch):
                 # ============ training one epoch of BEiT  ============
                 train_stats = train_one_epoch(
@@ -333,14 +333,14 @@ def main(args, model):
                         log_writer=log_writer,
                         args=args
                         )
-                
+
                 # ============ writing logs ============
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                              'client': cur_single_client,
                              'epoch': epoch,
                              'inner_epoch': inner_epoch,
                              'n_parameters': n_parameters}
-                
+
                 if args.output_dir and misc.is_main_process():
                     if log_writer is not None:
                         log_writer.flush()
