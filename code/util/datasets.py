@@ -177,6 +177,7 @@ def build_transform(is_train, mode, args):
         else:
             transform = transforms.Compose([
                 transforms.Resize(size=args.input_size),
+                transforms.CenterCrop(size=(args.input_size, args.input_size)), 
                 transforms.ToTensor(),
                 transforms.Normalize(
                     mean=torch.tensor(mean),
