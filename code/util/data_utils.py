@@ -77,7 +77,7 @@ class DatasetFLFinetune(data.Dataset):
         super(DatasetFLFinetune, self).__init__()
         self.phase = phase
         is_train = (phase == 'train')
-        
+
         if not is_train: 
             args.single_client = os.path.join(args.data_path, f'{self.phase}.csv')
         
@@ -116,19 +116,18 @@ class DatasetFLFinetune(data.Dataset):
         
         if self.args.data_set == 'Retina':
             img = np.load(path)
+            img = resize(img, (256, 256))
         else:
             img = np.array(Image.open(path).convert("RGB"))
-        
-        img = resize(img, (256, 256))
         
         if img.ndim < 3:
             img = np.concatenate((img,)*3, axis=-1)
         elif img.shape[2] >= 3:
             img = img[:,:,:3]
         
-        if self.transform is not None:
-            img = Image.fromarray(np.uint8(img))
-            sample = self.transform(img)
+        # if self.transform is not None:
+        img = Image.fromarray(np.uint8(img))
+        sample = self.transform(img)
 
         return sample, target
 
