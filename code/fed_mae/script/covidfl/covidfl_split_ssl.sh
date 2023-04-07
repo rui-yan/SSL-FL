@@ -9,7 +9,7 @@ cd /home/yan/SSL-FL/code/${FED_MODEL}/ # change this to "your_path/SSL/code/${FE
 DATASET='COVID-FL' # dataset name
 DATA_PATH="/home/yan/SSL-FL/data/${DATASET}/" # change DATA_PATH to the path where the data were stored
 
-SPLIT_TYPE='central' # chosen from {'central', 'split_real'}
+SPLIT_TYPE='split_real' # chosen from {'central', 'split_real'}
 N_CLASSES=3 # the number of classes in the dataset
 N_CLIENTS=12 # number of clients in the federated setting
 MASK_RATIO=0.3 # masking ratio for Fed-MAE pre-training
@@ -45,7 +45,7 @@ OUTPUT_PATH="/home/yan/SSL-FL/data/ckpts/${DATASET}/${FED_MODEL}/pretrained_epoc
 # CKPT_PATH="${OUTPUT_PATH}/checkpoint-1599.pth"
 
 # Uncomment this line if you want to directly fine-tune from the saved pre-trained checkpoints
-CKPT_PATH="/home/yan/SSL-FL/data/ckpts/COVID-FL/covidfl_pretrain_mae_base_central_checkpoint-1599.pth"
+CKPT_PATH="/home/yan/SSL-FL/data/ckpts/covidfl_pretrain_mae_base_split_checkpoint-1599.pth"
 
 FT_EPOCHS=100
 FT_LR='3e-3'
