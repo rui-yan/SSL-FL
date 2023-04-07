@@ -9,7 +9,7 @@ cd /home/yan/SSL-FL/code/${FED_MODEL}/ # change this to "your_path/SSL/code/${FE
 DATASET='Retina' # dataset name
 DATA_PATH="/home/yan/SSL-FL/data/${DATASET}/" # change DATA_PATH to the path where the data were stored
 
-SPLIT_TYPE='split_1' # chosen from {'central', 'split_1', 'split_2', 'split_3'}
+SPLIT_TYPE='central' # chosen from {'central', 'split_1', 'split_2', 'split_3'}
 N_CLASSES=2 # the number of classes in the dataset
 N_CLIENTS=5 # number of clients in the federated setting
 MASK_RATIO=0.6 # masking ratio for Fed-MAE pre-training
@@ -25,27 +25,27 @@ BATCH_SIZE=32
 OUTPUT_PATH="/home/yan/SSL-FL/data/ckpts/${DATASET}/${FED_MODEL}/pretrained_epoch${EPOCHS}_${SPLIT_TYPE}_blr${BLR}_bs${BATCH_SIZE}_ratio${MASK_RATIO}_dis${N_GPUS}"
 
 # change the CUDA devices available for model training
-# CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=${N_GPUS} run_mae_pretrain_FedAvg.py \
-#         --data_path ${DATA_PATH} \
-#         --data_set ${DATASET} \
-#         --output_dir ${OUTPUT_PATH} \
-#         --blr ${BLR} \
-#         --batch_size ${BATCH_SIZE} \
-#         --save_ckpt_freq 50 \
-#         --max_communication_rounds ${EPOCHS} \
-#         --split_type ${SPLIT_TYPE} \
-#         --mask_ratio ${MASK_RATIO} \
-#         --model mae_vit_base_patch16 \
-#         --warmup_epochs 40 \
-#         --weight_decay 0.05 \
-#         --norm_pix_loss --sync_bn \
-#         --n_clients ${N_CLIENTS} --E_epoch 1  --num_local_clients -1 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 OMP_NUM_THREADS=1 python -m torch.distributed.launch --nproc_per_node=${N_GPUS} run_mae_pretrain_FedAvg.py \
+        --data_path ${DATA_PATH} \
+        --data_set ${DATASET} \
+        --output_dir ${OUTPUT_PATH} \
+        --blr ${BLR} \
+        --batch_size ${BATCH_SIZE} \
+        --save_ckpt_freq 50 \
+        --max_communication_rounds ${EPOCHS} \
+        --split_type ${SPLIT_TYPE} \
+        --mask_ratio ${MASK_RATIO} \
+        --model mae_vit_base_patch16 \
+        --warmup_epochs 40 \
+        --weight_decay 0.05 \
+        --norm_pix_loss --sync_bn \
+        --n_clients ${N_CLIENTS} --E_epoch 1  --num_local_clients -1 \
 
 # ------------------ finetune ----------------- #
 CKPT_PATH="${OUTPUT_PATH}/checkpoint-1599.pth"
 
-# 
-CKPT_PATH="/home/yan/SSL-FL/data/ckpts/Retina/retina_pretrain_mae_base_split1_checkpoint-1599.pth"
+# Uncomment this line if you want to directly fine-tune from the saved pre-trained checkpoints
+# CKPT_PATH="/home/yan/SSL-FL/data/ckpts/retina_pretrain_mae_base_central_checkpoint-1599.pth"
 
 FT_EPOCHS=100
 FT_LR='3e-3'
