@@ -1,4 +1,4 @@
-#!/bin/bash#!/bin/bash
+#!/bin/bash
 # This script run Fed-MAE pre-training on centralized COVIDFL dataset, then finetune
 # Please modify the path DATA_PATH, OUTPUT_PATH
 
