@@ -1,7 +1,7 @@
-Self-supervised Federated Learning (SSL-FL)
-===========
+# Self-supervised Federated Learning (SSL-FL)
+
 ### Label-Efficient Self-Supervised Federated Learning for Tackling Data Heterogeneity in Medical Imaging
-IEEE Transactions on Medical Imaging, 2023. [HTML](https://ieeexplore.ieee.org/document/10004993) | [ArXiv](https://arxiv.org/abs/2205.08576) | [Cite](#reference)
+IEEE Transactions on Medical Imaging, 2023. [HTML](https://ieeexplore.ieee.org/document/10004993) | [ArXiv](https://arxiv.org/abs/2205.08576) | [Cite](#citation)
 
 **TL;DR:** Pytorch implementation of the self-supervised federated learning framework proposed in [our paper](https://arxiv.org/pdf/2205.08576.pdf) for simulating self-supervised classification on multi-institutional medical imaging data using federated learning.
 
@@ -12,22 +12,11 @@ IEEE Transactions on Medical Imaging, 2023. [HTML](https://ieeexplore.ieee.org/d
 <!-- [<img src="figure1.png" width="300px" align="left" />] -->
 <img src="figure2.png" width="800px" align="center" />
 
-## Reference
-If you find our work helpful in your research or if you use any source codes or datasets, please cite our paper. The bibtex is listed below:
-
-```
-@article{yan2023label,
-  title={Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging},
-  author={Yan, Rui and Qu, Liangqiong and Wei, Qingyue and Huang, Shih-Cheng and Shen, Liyue and Rubin, Daniel and Xing, Lei and Zhou, Yuyin},
-  journal={IEEE Transactions on Medical Imaging},
-  year={2023},
-  publisher={IEEE}
-}
-```
-
 ## Pre-requisites:
 ### Set Up Environment
-* ```conda env create -f environment.yml```
+* ```bash
+  conda env create -f environment.yml
+  ```
 * NVIDIA GPU (Tested on Nvidia Tesla V100 32G x 4, and Nvidia GeForce RTX 2080 Ti x 8) on local workstations
 * Python (3.8.12), torch (1.7.1), timm (0.3.2), numpy (1.21.2), pandas (1.4.2), scikit-learn (1.0.2), scipy (1.7.1), seaborn (0.11.2)
 <!--* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```-->
@@ -46,9 +35,26 @@ Please refer to [SSL-FL/data](https://github.com/rui-yan/SSL-FL/tree/main/data) 
 Sample scripts for running Fed-BEiT and Fed-MAE pre-training and finetuning on the Retina dataset can be found in the following directories: [SSL-FL/code/fed_beit/script/retina](https://github.com/rui-yan/SSL-FL/blob/main/code/fed_beit/script/retina/retina_split1_ssl.sh) for Fed-BEiT and [SSL-FL/code/fed_mae/script/retina](https://github.com/rui-yan/SSL-FL/blob/main/code/fed_mae/script/retina/retina_split1_ssl.sh) for Fed-MAE.
 
 To run Fed-BEiT, please download Dall-e tokenizers and save encoder.pkl and decoder.pkl to SSL-FL/data/tokenizer_weight: 
-- ```wget https://cdn.openai.com/dall-e/encoder.pkl```
-- ```wget https://cdn.openai.com/dall-e/decoder.pkl```
+```bash
+wget https://cdn.openai.com/dall-e/encoder.pkl
+wget https://cdn.openai.com/dall-e/decoder.pkl
+```
 
 ## Acknowledgements
-* This repository is based on [BEiT](https://github.com/microsoft/unilm/tree/master/beit) and [MAE](https://github.com/facebookresearch/mae).
-* The main FL setup is based on prior work ["Rethinking Architecture Design for Tackling Data Heterogeneity in Federated Learning"](https://github.com/Liangqiong/ViT-FL-main)
+We sincerely thank the authors of following open-source projects:
+- [BEiT](https://github.com/microsoft/unilm/tree/master/beit)
+- [MAE](https://github.com/facebookresearch/mae)
+- [ViT-FL](https://github.com/Liangqiong/ViT-FL-main)
+
+## Citation
+If you find our work helpful in your research or if you use any source codes or datasets, please cite our paper.
+
+```bibtex
+@article{yan2023label,
+  title={Label-efficient self-supervised federated learning for tackling data heterogeneity in medical imaging},
+  author={Yan, Rui and Qu, Liangqiong and Wei, Qingyue and Huang, Shih-Cheng and Shen, Liyue and Rubin, Daniel and Xing, Lei and Zhou, Yuyin},
+  journal={IEEE Transactions on Medical Imaging},
+  year={2023},
+  publisher={IEEE}
+}
+```
