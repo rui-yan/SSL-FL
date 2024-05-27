@@ -14,9 +14,12 @@ IEEE Transactions on Medical Imaging, 2023. [HTML](https://ieeexplore.ieee.org/d
 
 ## Pre-requisites:
 ### Set Up Environment
-* ```bash
-  conda env create -f environment.yml
-  ```
+```bash
+git clone https://github.com/rui-yan/SSL-FL.git
+cd SSL-FL
+conda env create -f ssfl_conda.yml
+conda activate ssfl
+```
 * NVIDIA GPU (Tested on Nvidia Tesla V100 32G x 4, and Nvidia GeForce RTX 2080 Ti x 8) on local workstations
 * Python (3.8.12), torch (1.7.1), timm (0.3.2), numpy (1.21.2), pandas (1.4.2), scikit-learn (1.0.2), scipy (1.7.1), seaborn (0.11.2)
 <!--* then ```pip install torch===1.7.1+cu110 torchvision===0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```-->
