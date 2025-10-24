@@ -1,1 +1,16 @@
-data/ckpts
+# Ignore python cache
+__pycache__/
+*.pyc
+
+# Ignore environment files
+myenv/
+.venv/
+
+# Ignore experiment outputs and data
+out_*
+eval_mae_sweep/
+data/
+
+# Ignore large model files
+*.pth
+*.h5
